@@ -1,0 +1,528 @@
+export const enum GL {
+  // None
+  NONE                  = 0x0000,
+
+  // BlendEquation
+  FUNC_ADD              = 0x8006,
+  FUNC_REVERSE_SUBTRACT = 0x800b,
+  FUNC_SUBTRACT         = 0x800a,
+  MAX                   = 0x8008,
+  MIN                   = 0x8007,
+
+  // BlendFunc
+  CONSTANT_ALPHA           = 0x8003,
+  CONSTANT_COLOR           = 0x8001,
+  DST_ALPHA                = 0x0304,
+  DST_COLOR                = 0x0306,
+  ONE                      = 0x0001,
+  ONE_MINUS_CONSTANT_ALPHA = 0x8004,
+  ONE_MINUS_CONSTANT_COLOR = 0x8002,
+  ONE_MINUS_DST_ALPHA      = 0x0305,
+  ONE_MINUS_DST_COLOR      = 0x0307,
+  ONE_MINUS_SRC_ALPHA      = 0x0303,
+  ONE_MINUS_SRC_COLOR      = 0x0301,
+  SRC_ALPHA                = 0x0302,
+  SRC_ALPHA_SATURATE       = 0x0308,
+  SRC_COLOR                = 0x0300,
+  ZERO                     = 0x0000,
+
+  // BufferBit
+  COLOR_BUFFER_BIT   = 0x4000,
+  DEPTH_BUFFER_BIT   = 0x0100,
+  STENCIL_BUFFER_BIT = 0x0400,
+
+  // BufferTarget
+  ARRAY_BUFFER              = 0x8892,
+  COPY_READ_BUFFER          = 0x8f36,
+  COPY_WRITE_BUFFER         = 0x8f37,
+  ELEMENT_ARRAY_BUFFER      = 0x8893,
+  PIXEL_PACK_BUFFER         = 0x88eb,
+  PIXEL_UNPACK_BUFFER       = 0x88ec,
+  TRANSFORM_FEEDBACK_BUFFER = 0x8c8e,
+  UNIFORM_BUFFER            = 0x8a11,
+
+  // BufferUsage
+  DYNAMIC_COPY = 0x88ea,
+  DYNAMIC_DRAW = 0x88e8,
+  DYNAMIC_READ = 0x88e9,
+  STATIC_COPY  = 0x88e6,
+  STATIC_DRAW  = 0x88e4,
+  STATIC_READ  = 0x88e5,
+  STREAM_COPY  = 0x88e2,
+  STREAM_DRAW  = 0x88e0,
+  STREAM_READ  = 0x88e1,
+
+  // Capability
+  BLEND                    = 0x0be2,
+  CULL_FACE                = 0x0b44,
+  DEPTH_TEST               = 0x0b71,
+  DITHER                   = 0x0bd0,
+  POLYGON_OFFSET_FILL      = 0x8037,
+  SAMPLE_ALPHA_TO_COVERAGE = 0x809e,
+  SAMPLE_COVERAGE          = 0x80a0,
+  SCISSOR_TEST             = 0x0c11,
+  STENCIL_TEST             = 0x0b90,
+
+  // CompareFunc
+  ALWAYS   = 0x0207,
+  EQUAL    = 0x0202,
+  GEQUAL   = 0x0206,
+  GREATER  = 0x0204,
+  LEQUAL   = 0x0203,
+  LESS     = 0x0201,
+  NEVER    = 0x0200,
+  NOTEQUAL = 0x0205,
+
+  // DataType
+  BOOL                           = 0x8b56,
+  BOOL_VEC2                      = 0x8b57,
+  BOOL_VEC3                      = 0x8b58,
+  BOOL_VEC4                      = 0x8b59,
+  BYTE                           = 0x1400,
+  FLOAT                          = 0x1406,
+  FLOAT_MAT2                     = 0x8b5a,
+  FLOAT_MAT2x3                   = 0x8b65,
+  FLOAT_MAT2x4                   = 0x8b66,
+  FLOAT_MAT3                     = 0x8b5b,
+  FLOAT_MAT3x2                   = 0x8b67,
+  FLOAT_MAT3x4                   = 0x8b68,
+  FLOAT_MAT4                     = 0x8b5c,
+  FLOAT_MAT4x2                   = 0x8b69,
+  FLOAT_MAT4x3                   = 0x8b6a,
+  FLOAT_VEC2                     = 0x8b50,
+  FLOAT_VEC3                     = 0x8b51,
+  FLOAT_VEC4                     = 0x8b52,
+  INT                            = 0x1404,
+  INT_SAMPLER_2D                 = 0x8dca,
+  INT_SAMPLER_2D_ARRAY           = 0x8dcf,
+  INT_SAMPLER_3D                 = 0x8dcb,
+  INT_SAMPLER_CUBE               = 0x8dcc,
+  INT_VEC2                       = 0x8b53,
+  INT_VEC3                       = 0x8b54,
+  INT_VEC4                       = 0x8b55,
+  SAMPLER_2D                     = 0x8b5e,
+  SAMPLER_2D_ARRAY               = 0x8dc1,
+  SAMPLER_2D_ARRAY_SHADOW        = 0x8dc4,
+  SAMPLER_2D_SHADOW              = 0x8b62,
+  SAMPLER_3D                     = 0x8b5f,
+  SAMPLER_CUBE                   = 0x8b60,
+  SAMPLER_CUBE_SHADOW            = 0x8dc5,
+  SHORT                          = 0x1402,
+  UNSIGNED_BYTE                  = 0x1401,
+  UNSIGNED_INT                   = 0x1405,
+  UNSIGNED_INT_24_8              = 0x84fa,
+  UNSIGNED_INT_SAMPLER_2D        = 0x8dd2,
+  UNSIGNED_INT_SAMPLER_2D_ARRAY  = 0x8dd7,
+  UNSIGNED_INT_SAMPLER_3D        = 0x8dd3,
+  UNSIGNED_INT_SAMPLER_CUBE      = 0x8dd4,
+  UNSIGNED_INT_VEC2              = 0x8dc6,
+  UNSIGNED_INT_VEC3              = 0x8dc7,
+  UNSIGNED_INT_VEC4              = 0x8dc8,
+  UNSIGNED_SHORT                 = 0x1403,
+  UNSIGNED_SHORT_4_4_4_4         = 0x8033,
+  UNSIGNED_SHORT_5_5_5_1         = 0x8034,
+  UNSIGNED_SHORT_5_6_5           = 0x8363,
+  UNSIGNED_INT_2_10_10_10_REV    = 0x8368,
+  HALF_FLOAT                     = 0x140b,
+  FLOAT_32_UNSIGNED_INT_24_8_REV = 0x8dad,
+  UNSIGNED_INT_10F_11F_11F_REV   = 0x8c3b,
+  UNSIGNED_INT_5_9_9_9_REV       = 0x8c3e,
+
+  // FramebufferAttachPoint
+  COLOR_ATTACHMENT0        = 0x8ce0,
+  COLOR_ATTACHMENT1        = 0x8ce1,
+  COLOR_ATTACHMENT2        = 0x8ce2,
+  COLOR_ATTACHMENT3        = 0x8ce3,
+  COLOR_ATTACHMENT4        = 0x8ce4,
+  COLOR_ATTACHMENT5        = 0x8ce5,
+  COLOR_ATTACHMENT6        = 0x8ce6,
+  COLOR_ATTACHMENT7        = 0x8ce7,
+  COLOR_ATTACHMENT8        = 0x8ce8,
+  COLOR_ATTACHMENT9        = 0x8ce9,
+  COLOR_ATTACHMENT10       = 0x8cea,
+  COLOR_ATTACHMENT11       = 0x8ceb,
+  COLOR_ATTACHMENT12       = 0x8cec,
+  COLOR_ATTACHMENT13       = 0x8ced,
+  COLOR_ATTACHMENT14       = 0x8cee,
+  COLOR_ATTACHMENT15       = 0x8cef,
+  DEPTH_ATTACHMENT         = 0x8d00,
+  DEPTH_STENCIL_ATTACHMENT = 0x821a,
+  STENCIL_ATTACHMENT       = 0x8d20,
+
+  // FramebufferBindPoint
+  DRAW_FRAMEBUFFER = 0x8ca9,
+  FRAMEBUFFER = 0x8d40,
+  READ_FRAMEBUFFER = 0x8ca8,
+
+  // Parameter
+  MAX_COMBINED_TEXTURE_IMAGE_UNITS = 0x8b4d,
+  MAX_CUBE_MAP_TEXTURE_SIZE        = 0x851c,
+  MAX_FRAGMENT_UNIFORM_VECTORS     = 0x8dfd,
+  MAX_RENDERBUFFER_SIZE            = 0x84e8,
+  MAX_TEXTURE_IMAGE_UNITS          = 0x8872,
+  MAX_TEXTURE_SIZE                 = 0xd33,
+  MAX_VARYING_VECTORS              = 0x8dfc,
+  MAX_VERTEX_ATTRIBS               = 0x8869,
+  MAX_VERTEX_TEXTURE_IMAGE_UNITS   = 0x8b4c,
+  MAX_VERTEX_UNIFORM_VECTORS       = 0x8dfb,
+  MAX_VIEWPORT_DIMS                = 0xd3a,
+
+  // Primitive
+  POINTS         = 0x0000,
+  LINES          = 0x0001,
+  LINE_LOOP      = 0x0002,
+  LINE_STRIP     = 0x0003,
+  TRIANGLES      = 0x0004,
+  TRIANGLE_STRIP = 0x0005,
+  TRIANGLE_FAN   = 0x0006,
+
+  // ProgramParameter
+  DELETE_STATUS                  = 0x8b80,
+  LINK_STATUS                    = 0x8b82,
+  VALIDATE_STATUS                = 0x8b83,
+  ATTACHED_SHADERS               = 0x8b85,
+  ACTIVE_ATTRIBUTES              = 0x8b89,
+  ACTIVE_UNIFORMS                = 0x8b86,
+  TRANSFORM_FEEDBACK_BUFFER_MODE = 0x8c7f,
+  TRANSFORM_FEEDBACK_VARYINGS    = 0x8c83,
+  ACTIVE_UNIFORM_BLOCKS          = 0x8a36,
+
+  // SamplerParameter
+  TEXTURE_COMPARE_FUNC = 0x884d,
+  TEXTURE_COMPARE_MODE = 0x884c,
+  TEXTURE_MAG_FILTER   = 0x2800,
+  TEXTURE_MAX_LOD      = 0x813b,
+  TEXTURE_MIN_FILTER   = 0x2801,
+  TEXTURE_MIN_LOD      = 0x813a,
+  TEXTURE_WRAP_R       = 0x8072,
+  TEXTURE_WRAP_S       = 0x2802,
+  TEXTURE_WRAP_T       = 0x2803,
+
+  // ShaderParameter
+  // DELETE_STATUS = 0x8b80,
+  COMPILE_STATUS   = 0x8b81,
+  SHADER_TYPE      = 0x8b4f,
+
+  // ShaderType
+  FRAGMENT_SHADER = 0x8b30,
+  VERTEX_SHADER   = 0x8b31,
+
+  // TextureCompareMode
+  COMPARE_REF_TO_TEXTURE = 0x884e,
+
+  // TextureInternalFormat
+  ALPHA              = 0x1906,
+  DEPTH_COMPONENT    = 0x1902,
+  DEPTH_COMPONENT16  = 0x81a5,
+  DEPTH_COMPONENT24  = 0x81a6,
+  DEPTH_COMPONENT32F = 0x8cac,
+  DEPTH_STENCIL      = 0x84f9,
+  DEPTH24_STENCIL8   = 0x88f0,
+  DEPTH32F_STENCIL8  = 0x8cad,
+  LUMINANCE          = 0x1909,
+  LUMINANCE_ALPHA    = 0x190a,
+  R11F_G11F_B10F     = 0x8c3a,
+  R16F               = 0x822d,
+  R32F               = 0x822e,
+  R8                 = 0x8229,
+  R8UI               = 0x8232,
+  RG16F              = 0x822f,
+  RG16UI             = 0x823a,
+  RG32F              = 0x8230,
+  RG32UI             = 0x823c,
+  RG8                = 0x822b,
+  RG8UI              = 0x8238,
+  RGB                = 0x1907,
+  RGB10_A2           = 0x8059,
+  RGB16F             = 0x881b,
+  RGB32F             = 0x8815,
+  RGB565             = 0x8d62,
+  RGB5_A1            = 0x8057,
+  RGB8               = 0x8051,
+  RGB8UI             = 0x8d7d,
+  RGB9_E5            = 0x8c3d,
+  RGBA               = 0x1908,
+  RGBA16F            = 0x881a,
+  RGBA32F            = 0x8814,
+  RGBA4              = 0x8056,
+  RGBA8              = 0x8058,
+  RGBA8UI            = 0x8d7c,
+  SRGB8              = 0x8c41,
+  SRGB8_ALPHA8       = 0x8c43,
+  RGBA8_SNORM        = 0x8f97,
+  RGBA8I             = 0x8d8e,
+  RGBA16UI           = 0x8d76,
+  RGBA16I            = 0x8d88,
+  RGBA32UI           = 0x8d70,
+  RGBA32I            = 0x8d82,
+  RGB10_A2UI         = 0x906f,
+  RGBA_INTEGER       = 0x8d99,
+  RGB8_SNORM         = 0x8f96,
+  RGB8I              = 0x8d8f,
+  RGB16UI            = 0x8d77,
+  RGB16I             = 0x8d89,
+  RGB32UI            = 0x8d71,
+  RGB32I             = 0x8d83,
+  RGB_INTEGER        = 0x8d98,
+  RG8_SNORM          = 0x8f95,
+  RG                 = 0x8227,
+  RG8I               = 0x8237,
+  RG16I              = 0x8239,
+  RG32I              = 0x823b,
+  RG_INTEGER         = 0x8228,
+  R8_SNORM           = 0x8f94,
+  RED                = 0x1903,
+  R8I                = 0x8231,
+  R16UI              = 0x8234,
+  R16I               = 0x8233,
+  R32UI              = 0x8236,
+  R32I               = 0x8235,
+  RED_INTEGER        = 0x8d94,
+
+  // Texture{Min,Mag}Filter
+  LINEAR                 = 0x2601,
+  NEAREST                = 0x2600,
+  NEAREST_MIPMAP_NEAREST = 0x2700,
+  LINEAR_MIPMAP_NEAREST  = 0x2701,
+  NEAREST_MIPMAP_LINEAR  = 0x2702,
+  LINEAR_MIPMAP_LINEAR   = 0x2703,
+
+  // TextureTarget
+  TEXTURE_2D                  = 0x0de1,
+  TEXTURE_3D                  = 0x806f,
+  TEXTURE_CUBE_MAP            = 0x8513,
+  TEXTURE_CUBE_MAP_POSITIVE_X = 0x8515,
+  TEXTURE_CUBE_MAP_NEGATIVE_X = 0x8516,
+  TEXTURE_CUBE_MAP_POSITIVE_Y = 0x8517,
+  TEXTURE_CUBE_MAP_NEGATIVE_Y = 0x8518,
+  TEXTURE_CUBE_MAP_POSITIVE_Z = 0x8519,
+  TEXTURE_CUBE_MAP_NEGATIVE_Z = 0x851a,
+  TEXTURE_2D_ARRAY            = 0x8c1a,
+
+  // TextureUnit
+  TEXTURE0  = 0x84c0,
+  TEXTURE1  = 0x84c1,
+  TEXTURE2  = 0x84c2,
+  TEXTURE3  = 0x84c3,
+  TEXTURE4  = 0x84c4,
+  TEXTURE5  = 0x84c5,
+  TEXTURE6  = 0x84c6,
+  TEXTURE7  = 0x84c7,
+  TEXTURE8  = 0x84c8,
+  TEXTURE9  = 0x84c9,
+  TEXTURE10 = 0x84ca,
+  TEXTURE11 = 0x84cb,
+  TEXTURE12 = 0x84cc,
+  TEXTURE13 = 0x84cd,
+  TEXTURE14 = 0x84ce,
+  TEXTURE15 = 0x84cf,
+  TEXTURE16 = 0x84d0,
+  TEXTURE17 = 0x84d1,
+  TEXTURE18 = 0x84d2,
+  TEXTURE19 = 0x84d3,
+  TEXTURE20 = 0x84d4,
+  TEXTURE21 = 0x84d5,
+  TEXTURE22 = 0x84d6,
+  TEXTURE23 = 0x84d7,
+  TEXTURE24 = 0x84d8,
+  TEXTURE25 = 0x84d9,
+  TEXTURE26 = 0x84da,
+  TEXTURE27 = 0x84db,
+  TEXTURE28 = 0x84dc,
+  TEXTURE29 = 0x84dd,
+  TEXTURE30 = 0x84de,
+  TEXTURE31 = 0x84df,
+
+  // TextureWrap
+  REPEAT          = 0x2901,
+  CLAMP_TO_EDGE   = 0x812f,
+  MIRRORED_REPEAT = 0x8370,
+ 
+  // UniformBlockParameter
+  UNIFORM_BLOCK_BINDING                       = 0x8a3f,
+  UNIFORM_BLOCK_DATA_SIZE                     = 0x8a40,
+  UNIFORM_BLOCK_ACTIVE_UNIFORMS               = 0x8a42,
+  UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES        = 0x8a43,
+  UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER   = 0x8a44,
+  UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER = 0x8a46,
+
+  // UniformParameter
+  UNIFORM_TYPE          = 0x8a37,
+  UNIFORM_SIZE          = 0x8a38,
+  UNIFORM_BLOCK_INDEX   = 0x8a3a,
+  UNIFORM_OFFSET        = 0x8a3b,
+  UNIFORM_ARRAY_STRIDE  = 0x8a3c,
+  UNIFORM_MATRIX_STRIDE = 0x8a3d,
+  UNIFORM_IS_ROW_MAJOR  = 0x8a3e,
+
+  // TextureAnisotropy
+  MAX_TEXTURE_MAX_ANISOTROPY_EXT = 0x84ff,
+  TEXTURE_MAX_ANISOTROPY_EXT = 0x84fe,
+
+  // Stencil
+  KEEP    = 0x1e00,
+  REPLACE = 0x1e01,
+  
+  // Query
+  QUERY_RESULT           = 0x8866,
+  QUERY_RESULT_AVAILABLE = 0x8867,
+  TIME_ELAPSED_EXT       = 0x88bf,
+  TIMESTAMP_EXT          = 0x8e28,
+  GPU_DISJOINT_EXT       = 0x8fbb,
+}
+
+export type BlendEquation =
+    GL.FUNC_ADD | GL.MIN | GL.MAX | GL.FUNC_SUBTRACT | GL.FUNC_REVERSE_SUBTRACT;
+
+export type BlendFunc = 
+    GL.ZERO | GL.ONE | GL.SRC_COLOR | GL.ONE_MINUS_SRC_COLOR | GL.SRC_ALPHA |
+    GL.ONE_MINUS_SRC_ALPHA | GL.DST_ALPHA | GL.ONE_MINUS_DST_ALPHA | GL.DST_COLOR |
+    GL.ONE_MINUS_DST_COLOR | GL.SRC_ALPHA_SATURATE | GL.CONSTANT_COLOR |
+    GL.ONE_MINUS_CONSTANT_COLOR | GL.CONSTANT_ALPHA | GL.ONE_MINUS_CONSTANT_ALPHA;
+
+export type BufferTarget =
+    GL.ARRAY_BUFFER | GL.COPY_READ_BUFFER | GL.COPY_WRITE_BUFFER |
+    GL.ELEMENT_ARRAY_BUFFER | GL.PIXEL_PACK_BUFFER | GL.PIXEL_UNPACK_BUFFER |
+    GL.TRANSFORM_FEEDBACK_BUFFER | GL.UNIFORM_BUFFER;
+
+export type BufferUsage =
+    GL.DYNAMIC_COPY | GL.DYNAMIC_DRAW | GL.DYNAMIC_READ | GL.STATIC_COPY |
+    GL.STATIC_DRAW | GL.STATIC_READ | GL.STREAM_COPY | GL.STREAM_DRAW |
+    GL.STREAM_READ;
+
+export type Capability =
+    GL.BLEND | GL.CULL_FACE | GL.DEPTH_TEST | GL.DITHER | GL.POLYGON_OFFSET_FILL |
+    GL.SAMPLE_ALPHA_TO_COVERAGE | GL.SAMPLE_COVERAGE | GL.SCISSOR_TEST |
+    GL.STENCIL_TEST;
+
+export type CompareFunc =
+    GL.ALWAYS | GL.EQUAL | GL.GEQUAL | GL.GREATER | GL.LEQUAL | GL.LESS |
+    GL.NEVER | GL.NOTEQUAL;
+
+export type DataType =
+    GL.BOOL | GL.BOOL_VEC2 | GL.BOOL_VEC3 | GL.BOOL_VEC4 | GL.BYTE |
+    GL.FLOAT |
+    GL.FLOAT_MAT2 | GL.FLOAT_MAT2x3 | GL.FLOAT_MAT2x4 |
+    GL.FLOAT_MAT3 | GL.FLOAT_MAT3x2 | GL.FLOAT_MAT3x4 |
+    GL.FLOAT_MAT4 | GL.FLOAT_MAT4x2 | GL.FLOAT_MAT4x3 |
+    GL.FLOAT_VEC2 | GL.FLOAT_VEC3 | GL.FLOAT_VEC4 |
+    GL.INT |
+    GL.INT_SAMPLER_2D | GL.INT_SAMPLER_2D_ARRAY |
+    GL.INT_SAMPLER_3D | GL.INT_SAMPLER_CUBE |
+    GL.INT_VEC2 | GL.INT_VEC3 | GL.INT_VEC4 |
+    GL.SAMPLER_2D | GL.SAMPLER_2D_ARRAY |
+    GL.SAMPLER_2D_ARRAY_SHADOW | GL.SAMPLER_2D_SHADOW |
+    GL.SAMPLER_3D | GL.SAMPLER_CUBE | GL.SAMPLER_CUBE_SHADOW |
+    GL.SHORT | GL.UNSIGNED_BYTE | GL.UNSIGNED_INT |
+    GL.UNSIGNED_SHORT |
+    GL.UNSIGNED_INT_24_8 |
+    GL.UNSIGNED_INT_SAMPLER_2D | GL.UNSIGNED_INT_SAMPLER_2D_ARRAY |
+    GL.UNSIGNED_INT_SAMPLER_3D | GL.UNSIGNED_INT_SAMPLER_CUBE |
+    GL.UNSIGNED_INT_VEC2 | GL.UNSIGNED_INT_VEC3 | GL.UNSIGNED_INT_VEC4 |
+    GL.UNSIGNED_SHORT_4_4_4_4 |
+    GL.UNSIGNED_SHORT_5_5_5_1 |
+    GL.UNSIGNED_SHORT_5_6_5 |
+    GL.UNSIGNED_INT_2_10_10_10_REV |
+    GL.HALF_FLOAT |
+    GL.FLOAT_32_UNSIGNED_INT_24_8_REV |
+    GL.UNSIGNED_INT_10F_11F_11F_REV |
+    GL.UNSIGNED_INT_5_9_9_9_REV;
+
+export type FramebufferAttachPoint =
+    GL.COLOR_ATTACHMENT0 | GL.COLOR_ATTACHMENT1 | GL.COLOR_ATTACHMENT2 |
+    GL.COLOR_ATTACHMENT3 | GL.COLOR_ATTACHMENT4 | GL.COLOR_ATTACHMENT5 |
+    GL.COLOR_ATTACHMENT6 | GL.COLOR_ATTACHMENT7 | GL.COLOR_ATTACHMENT8 |
+    GL.COLOR_ATTACHMENT9 | GL.COLOR_ATTACHMENT10 | GL.COLOR_ATTACHMENT11 |
+    GL.COLOR_ATTACHMENT12 | GL.COLOR_ATTACHMENT13 | GL.COLOR_ATTACHMENT14 |
+    GL.COLOR_ATTACHMENT15 | GL.DEPTH_ATTACHMENT | GL.DEPTH_STENCIL_ATTACHMENT |
+    GL.STENCIL_ATTACHMENT;
+
+export type FramebufferBindPoint =
+    GL.FRAMEBUFFER | GL.DRAW_FRAMEBUFFER | GL.READ_FRAMEBUFFER;
+
+
+export type Parameter =
+    GL.MAX_COMBINED_TEXTURE_IMAGE_UNITS | GL.MAX_CUBE_MAP_TEXTURE_SIZE |
+    GL.MAX_FRAGMENT_UNIFORM_VECTORS | GL.MAX_RENDERBUFFER_SIZE |
+    GL.MAX_TEXTURE_IMAGE_UNITS | GL.MAX_TEXTURE_SIZE | GL.MAX_VARYING_VECTORS |
+    GL.MAX_VERTEX_ATTRIBS | GL.MAX_VERTEX_TEXTURE_IMAGE_UNITS |
+    GL.MAX_VERTEX_UNIFORM_VECTORS | GL.MAX_VIEWPORT_DIMS;
+
+export type Primitive =
+    GL.POINTS | GL.LINES | GL.LINE_LOOP | GL.LINE_STRIP | GL.TRIANGLES |
+    GL.TRIANGLE_STRIP | GL.TRIANGLE_FAN;
+
+export type ProgramParameter =
+    GL.DELETE_STATUS | GL.LINK_STATUS | GL.VALIDATE_STATUS |
+    GL.ATTACHED_SHADERS | GL.ACTIVE_ATTRIBUTES | GL.ACTIVE_UNIFORMS |
+    GL.TRANSFORM_FEEDBACK_BUFFER_MODE | GL.TRANSFORM_FEEDBACK_VARYINGS |
+    GL.ACTIVE_UNIFORM_BLOCKS;
+
+export type SamplerParameter =
+    GL.TEXTURE_COMPARE_FUNC | GL.TEXTURE_COMPARE_MODE | GL.TEXTURE_MAG_FILTER |
+    GL.TEXTURE_MAX_LOD | GL.TEXTURE_MIN_FILTER | GL.TEXTURE_MIN_LOD |
+    GL.TEXTURE_WRAP_R | GL.TEXTURE_WRAP_S | GL.TEXTURE_WRAP_T;
+
+export type ShaderParameter =
+    GL.DELETE_STATUS | GL.COMPILE_STATUS | GL.SHADER_TYPE;
+
+export type ShaderType =
+    GL.FRAGMENT_SHADER | GL.VERTEX_SHADER;
+
+export type TextureCompareMode =
+    GL.NONE | GL.COMPARE_REF_TO_TEXTURE;
+
+export type TextureInternalFormat =
+    GL.ALPHA | GL.DEPTH_COMPONENT | GL.DEPTH_COMPONENT16 | GL.DEPTH_COMPONENT24 |
+    GL.DEPTH_COMPONENT32F | GL.DEPTH_STENCIL | GL.DEPTH24_STENCIL8 |
+    GL.LUMINANCE | GL.LUMINANCE_ALPHA | GL.R11F_G11F_B10F | GL.R16F | GL.R32F |
+    GL.R8 | GL.R8UI | GL.RG16F | GL.RG16UI | GL.RG32F | GL.RG32UI | GL.RG8 |
+    GL.RG8UI | GL.RGB | GL.RGB10_A2 | GL.RGB16F | GL.RGB32F | GL.RGB565 |
+    GL.RGB5_A1 | GL.RGB8 | GL.RGB8UI | GL.RGB9_E5 | GL.RGBA | GL.RGBA16F |
+    GL.RGBA32F | GL.RGBA4 | GL.RGBA8 | GL.RGBA8UI | GL.SRGB8 | GL.SRGB8_ALPHA8 |
+    GL.RGBA8_SNORM | GL.RGBA8I | GL.RGBA16UI | GL.RGBA16I | GL.RGBA32UI |
+    GL.RGBA32I | GL.RGB10_A2UI | GL.RGBA_INTEGER | GL.RGB8_SNORM | GL.RGB8I |
+    GL.RGB16UI | GL.RGB16I | GL.RGB32UI | GL.RGB32I | GL.RGB_INTEGER |
+    GL.RG8_SNORM | GL.RG | GL.RG8I | GL.RG16I | GL.RG32I | GL.RG_INTEGER |
+    GL.R8_SNORM | GL.RED | GL.R8I | GL.R16UI | GL.R16I | GL.R32UI | GL.R32I |
+    GL.RED_INTEGER | GL.DEPTH32F_STENCIL8;
+
+export type TextureMagFilter =
+    GL.LINEAR | GL.NEAREST;
+
+export type TextureMinFilter = 
+    TextureMagFilter |
+    GL.NEAREST_MIPMAP_NEAREST | GL.LINEAR_MIPMAP_NEAREST |
+    GL.NEAREST_MIPMAP_LINEAR | GL.LINEAR_MIPMAP_LINEAR;
+
+export type TextureTarget =
+    GL.TEXTURE_2D |
+    GL.TEXTURE_CUBE_MAP_POSITIVE_X | GL.TEXTURE_CUBE_MAP_NEGATIVE_X |
+    GL.TEXTURE_CUBE_MAP_POSITIVE_Y | GL.TEXTURE_CUBE_MAP_NEGATIVE_Y |
+    GL.TEXTURE_CUBE_MAP_POSITIVE_Z | GL.TEXTURE_CUBE_MAP_NEGATIVE_Z;
+
+export type MipmapTarget =
+    GL.TEXTURE_2D | GL.TEXTURE_CUBE_MAP | GL.TEXTURE_3D | GL.TEXTURE_2D_ARRAY;
+
+export type TextureUnit =
+    GL.TEXTURE0 | GL.TEXTURE1 | GL.TEXTURE2 | GL.TEXTURE3 | GL.TEXTURE4 |
+    GL.TEXTURE5 | GL.TEXTURE6 | GL.TEXTURE7 | GL.TEXTURE8 | GL.TEXTURE9 |
+    GL.TEXTURE10 | GL.TEXTURE11 | GL.TEXTURE12 | GL.TEXTURE13 | GL.TEXTURE14 |
+    GL.TEXTURE15 | GL.TEXTURE16 | GL.TEXTURE17 | GL.TEXTURE18 | GL.TEXTURE19 |
+    GL.TEXTURE20 | GL.TEXTURE21 | GL.TEXTURE22 | GL.TEXTURE23 | GL.TEXTURE24 |
+    GL.TEXTURE25 | GL.TEXTURE26 | GL.TEXTURE27 | GL.TEXTURE28 | GL.TEXTURE29 |
+    GL.TEXTURE30 | GL.TEXTURE31;
+
+export type TextureWrap =
+    GL.REPEAT | GL.CLAMP_TO_EDGE | GL.MIRRORED_REPEAT;
+
+export type UniformBlockParameter =
+    GL.UNIFORM_BLOCK_BINDING | GL.UNIFORM_BLOCK_DATA_SIZE |
+    GL.UNIFORM_BLOCK_ACTIVE_UNIFORMS | GL.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES |
+    GL.UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER |
+    GL.UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER;
+
+export type UniformParameter =
+    GL.UNIFORM_TYPE | GL.UNIFORM_SIZE | GL.UNIFORM_BLOCK_INDEX |
+    GL.UNIFORM_OFFSET | GL.UNIFORM_ARRAY_STRIDE | GL.UNIFORM_MATRIX_STRIDE |
+    GL.UNIFORM_IS_ROW_MAJOR;
