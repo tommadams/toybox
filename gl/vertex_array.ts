@@ -183,7 +183,7 @@ export class VertexBuffer extends Buffer {
     }
   }
 
-  setData(gl: WebGLRenderingContext, data: NumericArray, numVertices?: number) {
+  setData(gl: WebGL2RenderingContext, data: NumericArray, numVertices?: number) {
     gl.bindBuffer(GL.ARRAY_BUFFER, this.handle);
     data = coerceData(data, Float32Array);
 

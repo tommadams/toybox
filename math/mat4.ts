@@ -238,17 +238,27 @@ export function setOrtho(dst: Type, left: number, right: number, bottom: number,
 
 
 export function setPerspective(dst: Type, fovy: number, aspect: number, near: number, far: number) {
-  const a = fovy / 2;
-  const fn = far - near;
-  const cot = Math.cos(a) / Math.sin(a);
+  const nf = near - far;
+  const f = 1 / Math.tan(fovy / 2);
 
   dst.fill(0);
-  dst[0] = cot / aspect;
-  dst[5] = cot;
-  dst[10] = -(far + near) / fn;
+  dst[0] = f / aspect;
+  dst[5] = f;
+  dst[10] = (far + near) / nf;
   dst[11] = -1;
-  dst[14] = -(2 * near * far) / fn;
+  dst[14] = (2 * near * far) / nf;
   return dst;
+}
+
+
+// Returns the near clipping plane from a perspective projection matrix.
+export function getPerspectiveNear(a: ArgType) {
+  return a[14] / (a[10] - 1);
+}
+
+// Returns the far clipping plane from a perspective projection matrix.
+export function getPerspectiveFar(a: ArgType) {
+  return a[14] / (a[10] + 1);
 }
 
 
@@ -346,6 +356,20 @@ export function getCol(dst: v3.Type, col: number, m: ArgType) {
   return dst;
 }
 
+// From "Extracting Euler Angles from a Rotation Matrix" by Mike Day.
+// https://d3cw3dd2w32x2b.cloudfront.net/wp-content/uploads/2012/07/euler-angles1.pdf
+export function getRotation(dst: v3.Type, m: ArgType) {
+  let t1 = Math.atan2(m[6], m[10]);
+  let c2 = Math.sqrt(m[0] * m[0] + m[1] * m[1]);
+  let t2 = Math.atan2(-m[2], c2);
+  let s1 = Math.sin(t1);
+  let c1 = Math.cos(t1);
+  let t3 = Math.atan2(s1 * m[8] - c1 * m[4], c1 * m[5] - s1 * m[9]);
+  dst[0] = t1;
+  dst[1] = t2;
+  dst[2] = t3;
+  return dst;
+}
 
 export function setRow(dst: Type, row: number, v: v4.ArgType) {
   row *= 4;

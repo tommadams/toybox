@@ -12,7 +12,7 @@ layout(std140, column_major) uniform;
 `;
 
 function parseDirectDeps(src: string): Set<string> {
-  let deps = new Set();
+  let deps = new Set<string>();
   src.split('\n').forEach((line) => {
     const m = line.match(/^#include\s+"([^"]+)"\s*$/);
     if (m) {
@@ -22,7 +22,7 @@ function parseDirectDeps(src: string): Set<string> {
   return deps;
 }
 
-// TODO(tommadams): allow precision to be easily configured per shader.
+// TODO(tom): allow precision to be easily configured per shader.
 function getInstanceKey(uri: string, defines?: ShaderDefines, preamble?: string): string {
   defines || {};
   preamble || defaultPreamble;

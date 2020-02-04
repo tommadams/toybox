@@ -1,21 +1,61 @@
 import {GL} from 'toybox/gl/constants';
 import {Context} from 'toybox/gl/context';
 
-const extName = 'EXT_disjoint_timer_query_webgl2';
+const EXT_NAME = 'EXT_disjoint_timer_query_webgl2';
+const FILTER_SIZE = 3;
 
-console.log('RETHINK HOW BEGINFRAME AND ENDFRAME WORK: ON A RESIZE, RENDER IS CALLED WITHOUT UPDATE BEING CALLED TO START THE FRAME');
-console.log('RETHINK HOW BEGINFRAME AND ENDFRAME WORK: ON A RESIZE, RENDER IS CALLED WITHOUT UPDATE BEING CALLED TO START THE FRAME');
-console.log('RETHINK HOW BEGINFRAME AND ENDFRAME WORK: ON A RESIZE, RENDER IS CALLED WITHOUT UPDATE BEING CALLED TO START THE FRAME');
-console.log('RETHINK HOW BEGINFRAME AND ENDFRAME WORK: ON A RESIZE, RENDER IS CALLED WITHOUT UPDATE BEING CALLED TO START THE FRAME');
+class CircularBuffer<T> {
+  private idx = -1;
+  private buffer: T[];
+  private len = 0;
+
+  constructor(length: number) {
+    this.buffer = new Array<T>(length);
+  }
+
+  get length() { return this.len; }
+  get capacity() { return this.buffer.length; }
+
+  push(x: T) {
+    this.idx = (this.idx + 1) % this.buffer.length;
+    this.len = Math.min(this.len + 1, this.buffer.length);
+    this.buffer[this.idx] = x;
+  }
+
+  // If i >= 0, returns the i'th most recent element pushed into the buffer.
+  // If i < 0, returns element (length + i) from the buffer.
+  // For example:
+  //   buffer = new CircularBuffer<string>(10);
+  //   buffer.push('a');
+  //   buffer.push('b');
+  //   buffer.push('c');
+  //   buffer.at(0);  // returns 'c'
+  //   buffer.at(1);  // returns 'b'
+  //   buffer.at(2);  // returns 'a'
+  //   buffer.at(-1);  // returns 'a'
+  //   buffer.at(-2);  // returns 'b'
+  //   buffer.at(-3);  // returns 'c'
+  at(i: number) {
+    if (i < 0) { i += this.len; }
+    return this.buffer[(this.idx + this.len - i) % this.len];
+  }
+}
 
 class Hud {
   private table: HTMLElement;
   private canvas: HTMLCanvasElement;
   private pixelRatio = Math.floor(window.devicePixelRatio) || 1;
-  private history: Float32Array;
-  private index = -1;
+
+  // Circular buffer of frame times.
+  private frameTime: CircularBuffer<number>;
+
+  // WebGL timing events are noisy, containing inaccurate spikes. To smooth
+  // these out the HUD keeps short circular buffers of the scopes and reports
+  // their median.
+  private scopes = new Map<string, number[]>();
 
   constructor(parentElem: HTMLElement) {
+    (window as any)['hud'] = this;
     this.canvas = document.createElement('canvas');
     parentElem.appendChild(this.canvas);
 
@@ -29,23 +69,18 @@ class Hud {
     this.table = document.createElement('table');
     parentElem.appendChild(this.table);
 
-    this.history = new Float32Array(width);
+    this.frameTime = new CircularBuffer<number>(width);
   }
 
   update(profile: Profile) {
-    this.index = (this.index + 1) % this.history.length;
-    this.history[this.index] = profile.frameTime;
+    this.frameTime.push(profile.frameTime);
 
     let ctx = this.canvas.getContext('2d');
     ctx.setTransform(1, 0, 0, -1, 0, this.canvas.height);
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     let scale = this.canvas.height / 48;
-    let idx = this.index;
-    for (let i = 0; i < this.history.length; ++i) {
-      let ms = this.history[idx--];
-      if (idx == -1) {
-        idx = this.history.length - 1;
-      }
+    for (let i = 0; i < this.frameTime.length; ++i) {
+      let ms = this.frameTime.at(i);
       if (ms <= 19) {
         ctx.fillStyle = '#0f0';
       } else if (ms <= 36) {
@@ -59,14 +94,24 @@ class Hud {
     }
 
     let rows: [string, number][] = [
-      ['frame', this.history[this.index]],
+      ['frame', this.frameTime.at(0)],
       ['js', profile.jsTime],
     ];
     for (let scope of profile.scopes) {
+      let buf = this.scopes.get(scope.tag);
+      if (buf == null) {
+        buf = [];
+        this.scopes.set(scope.tag, buf);
+      }
+      buf.push(scope.elapsedNanos);
+      if (buf.length > FILTER_SIZE) {
+        buf.shift();
+      }
       if (scope.elapsedNanos > 0) {
-        rows.push([scope.tag, scope.elapsedNanos / 1000 / 1000]);
+        rows.push([scope.tag, Math.min.apply(null, buf) / 1000000]);
       }
     }
+
     let html: string[] = [];
     for (let row of rows) {
       let tag = row[0];
@@ -105,8 +150,8 @@ export class Profiler {
   profile: Profile = new Profile(0);
 
   constructor(private ctx: Context, parentElem: string | HTMLElement = null) {
-    if (!this.ctx.gl.getExtension(extName)) {
-      throw new Error(`${extName} not supported`);
+    if (!this.ctx.gl.getExtension(EXT_NAME)) {
+      throw new Error(`${EXT_NAME} not supported`);
     }
     if (parentElem != null) {
       if (typeof parentElem == 'string') {
@@ -126,6 +171,7 @@ export class Profiler {
   }
 
   endFrame() {
+    if (this.activeProfile == null) { return; }
     let gl = this.ctx.gl;
     if (gl.getParameter(GL.GPU_DISJOINT_EXT)) {
       this.pendingProfiles = [];
@@ -160,15 +206,6 @@ export class Profiler {
     if (this.hud != null && this.profile != null) {
       this.hud.update(this.profile);
     }
-    //let str = '';
-    //for (let scope of this.profile.scopes) {
-    //  if (scope.elapsedNanos == 0) {
-    //    continue;
-    //  }
-    //  let ms = (scope.elapsedNanos) / 1000 / 1000;
-    //  str += ` ${scope.tag}:${ms.toFixed(3)}ms`;
-    //}
-    //console.log(str);
   }
 
   beginScope(tag: string) {

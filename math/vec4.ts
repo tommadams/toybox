@@ -23,3 +23,20 @@ export function setFromValues(dst: Type, x: number, y: number, z: number, w: num
   dst[3] = w;
   return dst;
 }
+
+export function normalize(dst: Type, a: ArgType) {
+  const s = 1 / Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2] + a[3] * a[3]);
+  dst[0] = s * a[0];
+  dst[1] = s * a[1];
+  dst[2] = s * a[2];
+  dst[3] = s * a[3];
+  return dst;
+}
+
+export function scale(dst: Type, a: ArgType, s: number) {
+  dst[0] = a[0] * s;
+  dst[1] = a[1] * s;
+  dst[2] = a[2] * s;
+  dst[3] = a[3] * s;
+  return dst;
+}

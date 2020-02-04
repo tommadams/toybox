@@ -318,11 +318,14 @@ export class Context {
   clear(mask: GLbitfield) { this.gl.clear(mask); }
   clearColor(r: GLclampf = 0, g: GLclampf = 0, b: GLclampf = 0, a: GLclampf = 0) { this.gl.clearColor(r, g, b, a); }
   colorMask(r: GLboolean = true, g: GLboolean = true, b: GLboolean = true, a: GLboolean = true) { this.gl.colorMask(r, g, b, a); }
+  stencilMask(mask: GLuint) { this.gl.stencilMask(mask); }
   createSampler(): WebGLSampler { return this.gl.createSampler(); }
   depthMask(flag: GLboolean = true) { this.gl.depthMask(flag); }
   depthFunc(func: CompareFunc) { this.gl.depthFunc(func); }
   disable(cap: Capability) { this.gl.disable(cap); }
   enable(cap: Capability) { this.gl.enable(cap); }
+
+  polygonOffset(factor: GLfloat, units: GLfloat) { this.gl.polygonOffset(factor, units); }
 
   // TODO(tom): strongly type.
   stencilFunc(func: GLenum, ref: GLint, mask: GLuint) { this.gl.stencilFunc(func, ref, mask); }

@@ -83,11 +83,11 @@ export abstract class App {
   }
 
   // Called once all async requests have completed and resources are ready.
-  abstract onInit(): void;
+  protected abstract onInit(): void;
 
-  abstract updateImpl(time: number): void;
+  protected abstract updateImpl(time: number): void;
 
-  abstract renderImpl(): void;
+  protected abstract renderImpl(): void;
 
   update(time: number) {
     this.ctx.beginFrame();
