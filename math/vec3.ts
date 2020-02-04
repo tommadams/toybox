@@ -173,7 +173,7 @@ export function max(dst: Type, a: ArgType, b: ArgType) {
 }
 
 export function lerp(dst: Type, a: ArgType, b: ArgType, t: number) {
-  var x = a[0], y = a[1], z = a[2];
+  const x = a[0], y = a[1], z = a[2];
   dst[0] = (b[0] - x) * t + x;
   dst[1] = (b[1] - y) * t + y;
   dst[2] = (b[2] - z) * t + z;

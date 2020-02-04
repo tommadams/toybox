@@ -81,7 +81,7 @@ export function keyReleased(keyCode: number) {
 export function reset() {
   mouseDx = 0;
   mouseDy = 0;
-  for (var i = 0; i < keysDown.length; ++i) {
+  for (let i = 0; i < keysDown.length; ++i) {
     prevKeysDown[i] = false;
     keysDown[i] = false;
   }
@@ -91,7 +91,7 @@ export function reset() {
 export function flush() {
   mouseDx = 0;
   mouseDy = 0;
-  for (var i = 0; i < keysDown.length; ++i) {
+  for (let i = 0; i < keysDown.length; ++i) {
     prevKeysDown[i] = keysDown[i];
   }
 }

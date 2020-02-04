@@ -3,7 +3,7 @@ import {ShaderErrorMsg} from 'toybox/gl/shader';
 
 import * as input from 'toybox/app/input';
 
-declare var CodeMirror: any;
+declare let CodeMirror: any;
 
 CodeMirror.defineSimpleMode('glsl', {
   // The start state contains the rules that are intially used
