@@ -55,7 +55,6 @@ class Hud {
   private scopes = new Map<string, number[]>();
 
   constructor(parentElem: HTMLElement) {
-    (window as any)['hud'] = this;
     this.canvas = document.createElement('canvas');
     parentElem.appendChild(this.canvas);
 

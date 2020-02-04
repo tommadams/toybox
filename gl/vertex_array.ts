@@ -196,13 +196,14 @@ export class VertexBuffer extends Buffer {
       if (data.length % this.stride != 0) {
         throw new Error(`data length ${data.length} is not divisible by stride ${this.stride}`);
       }
-      this.numVertices = data.length / this.stride;
-    } else {
-      this.numVertices = numVertices;
+      numVertices = data.length / this.stride;
     }
-    // TODO(tom): call bufferSubData to avoid uploading all of data if
-    // numVertices < data.length / this.stride.
-    gl.bufferData(GL.ARRAY_BUFFER, data, this.usage);
+    if (numVertices >= this.numVertices) {
+      gl.bufferData(GL.ARRAY_BUFFER, data, this.usage);
+    } else {
+      gl.bufferSubData(GL.ARRAY_BUFFER, 0, data, 0);
+    }
+    this.numVertices = numVertices;
   }
 
   setSubData(
