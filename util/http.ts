@@ -6,9 +6,6 @@ export function get(uri: string): Promise<string> {
     let r = new XMLHttpRequest();
     r.open('GET', uri, true);
     r.onload = () => {
-      if (r.status != 200) {
-        console.log(`${r.status}: ${uri}`);
-      }
       if (r.status == 200) {
         resolve(r.responseText);
       } else {
