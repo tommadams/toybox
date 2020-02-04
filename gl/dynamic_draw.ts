@@ -18,6 +18,7 @@ const _tmp5 = v3.newZero();
 const _tmp6 = v3.newZero();
 const _tmp7 = v3.newZero();
 const _col = v4.newZero();
+const BLACK = v4.newFromValues(0, 0, 0, 1);
 
 enum BlitMode {
   RGB = 0,
@@ -353,6 +354,15 @@ export class DynamicDraw {
       this.triangles.push(o[0], o[1], o[2], color[0], color[1], color[2], alpha);
       this.triangles.push(a[0], a[1], a[2], color[0], color[1], color[2], alpha);
       this.triangles.push(b[0], b[1], b[2], color[0], color[1], color[2], alpha);
+    }
+  }
+
+  outlinePolygon(verts: v3.Type[], col: v3.ArgType | v4.ArgType) {
+    this.polygon(verts, col);
+    let j = verts.length - 1;
+    for (let i = 0; i < verts.length; ++i) {
+      this.line(verts[j], verts[i], BLACK);
+      j = i;
     }
   }
 
