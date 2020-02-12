@@ -180,6 +180,13 @@ export function lerp(dst: Type, a: ArgType, b: ArgType, t: number) {
   return dst;
 }
 
+export function midpoint(dst: Type, a: ArgType, b: ArgType) {
+  dst[0] = (a[0] + b[0]) * 0.5;
+  dst[1] = (a[1] + b[1]) * 0.5;
+  dst[2] = (a[2] + b[2]) * 0.5;
+  return dst;
+}
+
 // Sets `dst` to an unit length vector perpendicular to `a`.
 // The exact direction of `dst` is undefined, but consistent: the same vector
 // is calculated for all input vectors pointing in the same direction,

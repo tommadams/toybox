@@ -1,6 +1,8 @@
 import * as vec3 from 'toybox/math/vec3';
 
-export const VERTICES: vec3.Type[] = (() => {
+import {Mesh, flatten} from 'toybox/geom/mesh';
+
+const positions: vec3.Type[] = (() => {
   const theta = 0.4 * Math.PI;
   const phi = Math.atan(0.5);
   let sp = Math.sin(phi);
@@ -26,7 +28,7 @@ export const VERTICES: vec3.Type[] = (() => {
   return vertices;
 })();
 
-export const FACE_INDICES = [
+const faceIndices = [
   // Top cap.
   0, 2, 1,
   0, 3, 2,
@@ -56,7 +58,7 @@ export const FACE_INDICES = [
   11, 10,  6,
 ];
 
-export const EDGE_INDICES = [
+const edgeIndices = [
   // Top spokes.
   0, 1,  0, 2,  0, 3,  0, 4,  0, 5,
 
@@ -72,3 +74,6 @@ export const EDGE_INDICES = [
   // Bottom spokes.
   11, 10,  11, 9,  11, 8,  11, 7,  11, 6,
 ];
+
+export let mesh = {positions, faceIndices, edgeIndices};
+export let flatMesh = flatten(mesh);
