@@ -1,6 +1,6 @@
-import * as m4 from 'toybox/math/mat4'
-import * as v3 from 'toybox/math/vec3'
-import * as v4 from 'toybox/math/vec4'
+import * as mat4 from 'toybox/math/mat4'
+import * as vec3 from 'toybox/math/vec3'
+import * as vec4 from 'toybox/math/vec4'
 import {Context} from 'toybox/gl/context'
 import {GL} from 'toybox/gl/constants'
 import {ShaderProgram} from 'toybox/gl/shader'
@@ -9,16 +9,16 @@ import {TypedArrayList} from 'toybox/util/array'
 import {VertexArray} from 'toybox/gl/vertex_array'
 
 
-const _tmp0 = v3.newZero();
-const _tmp1 = v3.newZero();
-const _tmp2 = v3.newZero();
-const _tmp3 = v3.newZero();
-const _tmp4 = v3.newZero();
-const _tmp5 = v3.newZero();
-const _tmp6 = v3.newZero();
-const _tmp7 = v3.newZero();
-const _col = v4.newZero();
-const BLACK = v4.newFromValues(0, 0, 0, 1);
+const _tmp0 = vec3.newZero();
+const _tmp1 = vec3.newZero();
+const _tmp2 = vec3.newZero();
+const _tmp3 = vec3.newZero();
+const _tmp4 = vec3.newZero();
+const _tmp5 = vec3.newZero();
+const _tmp6 = vec3.newZero();
+const _tmp7 = vec3.newZero();
+const _col = vec4.newZero();
+const BLACK = vec4.newFromValues(0, 0, 0, 1);
 
 enum BlitMode {
   RGB = 0,
@@ -158,13 +158,13 @@ export class DynamicDraw {
     });
   }
 
-  line(a: v3.ArgType, b: v3.ArgType, color: v3.ArgType | v4.ArgType) {
+  line(a: vec3.ArgType, b: vec3.ArgType, color: vec3.ArgType | vec4.ArgType) {
     const alpha = color.length == 4 ? color[3] : 1;
     this.lines.push(a[0], a[1], a[2], color[0], color[1], color[2], alpha);
     this.lines.push(b[0], b[1], b[2], color[0], color[1], color[2], alpha);
   };
 
-  lineLoop(positions: v3.ArgType[], color: v3.ArgType | v4.ArgType) {
+  lineLoop(positions: vec3.ArgType[], color: vec3.ArgType | vec4.ArgType) {
     const alpha = color.length == 4 ? color[3] : 1;
     let n = positions.length;
     let prev = positions[n - 1];
@@ -176,7 +176,7 @@ export class DynamicDraw {
     }
   }
 
-  lineStrip(positions: v3.ArgType[], color: v3.ArgType | v4.ArgType) {
+  lineStrip(positions: vec3.ArgType[], color: vec3.ArgType | vec4.ArgType) {
     const alpha = color.length == 4 ? color[3] : 1;
     let n = positions.length;
     let prev = positions[0];
@@ -188,15 +188,15 @@ export class DynamicDraw {
     }
   }
 
-  aabb(min: v3.ArgType, max: v3.ArgType, color: v3.ArgType | v4.ArgType) {
-    const a = v3.setFromValues(_tmp0, min[0], min[1], min[2]);
-    const b = v3.setFromValues(_tmp1, max[0], min[1], min[2]);
-    const c = v3.setFromValues(_tmp2, min[0], min[1], max[2]);
-    const d = v3.setFromValues(_tmp3, max[0], min[1], max[2]);
-    const e = v3.setFromValues(_tmp4, min[0], max[1], min[2]);
-    const f = v3.setFromValues(_tmp5, max[0], max[1], min[2]);
-    const g = v3.setFromValues(_tmp6, min[0], max[1], max[2]);
-    const h = v3.setFromValues(_tmp7, max[0], max[1], max[2]);
+  aabb(min: vec3.ArgType, max: vec3.ArgType, color: vec3.ArgType | vec4.ArgType) {
+    const a = vec3.setFromValues(_tmp0, min[0], min[1], min[2]);
+    const b = vec3.setFromValues(_tmp1, max[0], min[1], min[2]);
+    const c = vec3.setFromValues(_tmp2, min[0], min[1], max[2]);
+    const d = vec3.setFromValues(_tmp3, max[0], min[1], max[2]);
+    const e = vec3.setFromValues(_tmp4, min[0], max[1], min[2]);
+    const f = vec3.setFromValues(_tmp5, max[0], max[1], min[2]);
+    const g = vec3.setFromValues(_tmp6, min[0], max[1], max[2]);
+    const h = vec3.setFromValues(_tmp7, max[0], max[1], max[2]);
 
     const v = this.lines;
     const alpha = color.length == 4 ? color[3] : 1;
@@ -228,25 +228,25 @@ export class DynamicDraw {
     v.push(h[0], h[1], h[2], color[0], color[1], color[2], alpha);
   }
 
-  obb(transform: m4.ArgType, min: v3.ArgType, max: v3.ArgType, color: v3.ArgType | v4.ArgType) {
+  obb(transform: mat4.ArgType, min: vec3.ArgType, max: vec3.ArgType, color: vec3.ArgType | vec4.ArgType) {
     // TODO(tom): transform box to (center, extents) representation, then just
     // need to transform center & extents in order to calculate the vertices.
-    const a = v3.setFromValues(_tmp0, min[0], min[1], min[2]);
-    const b = v3.setFromValues(_tmp1, max[0], min[1], min[2]);
-    const c = v3.setFromValues(_tmp2, min[0], min[1], max[2]);
-    const d = v3.setFromValues(_tmp3, max[0], min[1], max[2]);
-    const e = v3.setFromValues(_tmp4, min[0], max[1], min[2]);
-    const f = v3.setFromValues(_tmp5, max[0], max[1], min[2]);
-    const g = v3.setFromValues(_tmp6, min[0], max[1], max[2]);
-    const h = v3.setFromValues(_tmp7, max[0], max[1], max[2]);
-    m4.mulPos(a, transform, a);
-    m4.mulPos(b, transform, b);
-    m4.mulPos(c, transform, c);
-    m4.mulPos(d, transform, d);
-    m4.mulPos(e, transform, e);
-    m4.mulPos(f, transform, f);
-    m4.mulPos(g, transform, g);
-    m4.mulPos(h, transform, h);
+    const a = vec3.setFromValues(_tmp0, min[0], min[1], min[2]);
+    const b = vec3.setFromValues(_tmp1, max[0], min[1], min[2]);
+    const c = vec3.setFromValues(_tmp2, min[0], min[1], max[2]);
+    const d = vec3.setFromValues(_tmp3, max[0], min[1], max[2]);
+    const e = vec3.setFromValues(_tmp4, min[0], max[1], min[2]);
+    const f = vec3.setFromValues(_tmp5, max[0], max[1], min[2]);
+    const g = vec3.setFromValues(_tmp6, min[0], max[1], max[2]);
+    const h = vec3.setFromValues(_tmp7, max[0], max[1], max[2]);
+    mat4.mulPos(a, transform, a);
+    mat4.mulPos(b, transform, b);
+    mat4.mulPos(c, transform, c);
+    mat4.mulPos(d, transform, d);
+    mat4.mulPos(e, transform, e);
+    mat4.mulPos(f, transform, f);
+    mat4.mulPos(g, transform, g);
+    mat4.mulPos(h, transform, h);
 
     const v = this.lines;
     const alpha = color.length == 4 ? color[3] : 1;
@@ -278,36 +278,36 @@ export class DynamicDraw {
     v.push(h[0], h[1], h[2], color[0], color[1], color[2], alpha);
   }
 
-  axis(transform: m4.ArgType, size: number, color?: v3.ArgType | v4.ArgType) {
-    const o = v3.setFromValues(
+  axis(transform: mat4.ArgType, size: number, color?: vec3.ArgType | vec4.ArgType) {
+    const o = vec3.setFromValues(
         _tmp0, transform[12], transform[13], transform[14]);
 
-    const x = v3.setFromValues(
+    const x = vec3.setFromValues(
         _tmp1,
         o[0] + size * transform[0],
         o[1] + size * transform[1],
         o[2] + size * transform[2]);
-    let col = color || v4.setFromValues(_col, 1, 0, 0, 1);
+    let col = color || vec4.setFromValues(_col, 1, 0, 0, 1);
     this.line(o, x, col);
 
-    const y = v3.setFromValues(
+    const y = vec3.setFromValues(
         _tmp1,
         o[0] + size * transform[4],
         o[1] + size * transform[5],
         o[2] + size * transform[6]);
-    col = color || v4.setFromValues(_col, 0, 1, 0, 1);
+    col = color || vec4.setFromValues(_col, 0, 1, 0, 1);
     this.line(o, y, col);
 
-    const z = v3.setFromValues(
+    const z = vec3.setFromValues(
         _tmp1,
         o[0] + size * transform[8],
         o[1] + size * transform[9],
         o[2] + size * transform[10]);
-    col = color || v4.setFromValues(_col, 0, 0, 1, 1);
+    col = color || vec4.setFromValues(_col, 0, 0, 1, 1);
     this.line(o, z, col);
   }
 
-  wireSphere(o: v3.ArgType, r: number, color: v3.ArgType | v4.ArgType, numSegments = 24) {
+  wireSphere(o: vec3.ArgType, r: number, color: vec3.ArgType | vec4.ArgType, numSegments = 24) {
     const rings = numSegments < 16 ? 0 : 1;
     const ox = o[0];
     const oy = o[1];
@@ -341,7 +341,7 @@ export class DynamicDraw {
     this.lines.push(ox, oy, oz + r, color[0], color[1], color[2], alpha);
   }
 
-  polygon(verts: v3.ArgType[], color: v3.ArgType | v4.ArgType) {
+  polygon(verts: vec3.ArgType[], color: vec3.ArgType | vec4.ArgType) {
     if (verts.length < 3) {
       return;
     }
@@ -357,7 +357,7 @@ export class DynamicDraw {
     }
   }
 
-  outlinePolygon(verts: v3.Type[], col: v3.ArgType | v4.ArgType) {
+  outlinePolygon(verts: vec3.Type[], col: vec3.ArgType | vec4.ArgType) {
     this.polygon(verts, col);
     let j = verts.length - 1;
     for (let i = 0; i < verts.length; ++i) {
@@ -366,7 +366,14 @@ export class DynamicDraw {
     }
   }
 
-  flush(viewProj: m4.ArgType, offset=0) {
+  triangle(a: vec3.ArgType, b: vec3.ArgType, c: vec3.ArgType, color: vec3.ArgType | vec4.ArgType) {
+    const alpha = color.length == 4 ? color[3] : 1;
+    this.triangles.push(a[0], a[1], a[2], color[0], color[1], color[2], alpha);
+    this.triangles.push(b[0], b[1], b[2], color[0], color[1], color[2], alpha);
+    this.triangles.push(c[0], c[1], c[2], color[0], color[1], color[2], alpha);
+  }
+
+  flush(viewProj: mat4.ArgType, offset=0) {
     if (this.triangles.length == 0 && this.lines.length == 0) {
       return;
     }
