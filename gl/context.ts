@@ -1,6 +1,6 @@
 import {Block, Shader, ShaderDefines, ShaderProgram, UniformBlockSetting} from 'toybox/gl/shader';
 import {Framebuffer} from 'toybox/gl/framebuffer';
-import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, SamplerParameter} from 'toybox/gl/constants';
+import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, SamplerParameter, TextureTarget} from 'toybox/gl/constants';
 import {ShaderRegistry} from 'toybox/gl/shader_registry';
 import {Profiler} from 'toybox/gl/profiler';
 import {Texture2D, Texture2DDef} from 'toybox/gl/texture';
@@ -215,7 +215,7 @@ export class Context {
   }
 
   newFramebuffer(color: null | Texture2D | Texture2DDef | Array<Texture2D | Texture2DDef>,
-                 depth?: null | Texture2D | Texture2DDef) {
+                 depth?: null | Texture2D | Texture2DDef, target: TextureTarget = GL.TEXTURE_2D) {
     let colorTex: null | Texture2D | Array<Texture2D>;
     let depthTex: null | Texture2D | undefined;
 

@@ -1,5 +1,5 @@
 import {Context} from 'toybox/gl/context'
-import {GL} from 'toybox/gl/constants'
+import {GL, TextureTarget} from 'toybox/gl/constants'
 import {Texture2D} from 'toybox/gl/texture'
 
 export class Framebuffer {
@@ -10,18 +10,18 @@ export class Framebuffer {
   depth: Texture2D = null;
 
   constructor(ctx: Context, color: null | Texture2D | Texture2D[],
-              depth?: null | Texture2D) {
+              depth: Texture2D = null, target: TextureTarget = GL.TEXTURE_2D) {
     const gl = ctx.gl;
     this.handle = gl.createFramebuffer();
 
     if (Array.isArray(color)) {
-      color.forEach((tex) => {
+      for (let tex of color) {
         if (tex.width == 0 || tex.height == 0) {
           throw new Error(`texture must have non-zero side, got ${tex.width}x${tex.height}`);
         }
         this.checkDimensions(tex);
         this.color.push(tex);
-      });
+      };
     } else if (color instanceof Texture2D) {
       this.checkDimensions(color);
       this.color.push(color);
@@ -35,11 +35,11 @@ export class Framebuffer {
     gl.bindFramebuffer(GL.FRAMEBUFFER, this.handle);
     this.color.forEach((tex, i) => {
       gl.framebufferTexture2D(
-          GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0 + i, GL.TEXTURE_2D, tex.handle, 0);
+          GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0 + i, target, tex.handle, 0);
     });
     if (this.depth) {
       gl.framebufferTexture2D(
-          GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.TEXTURE_2D, this.depth.handle, 0);
+          GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, target, this.depth.handle, 0);
     }
   }
 
