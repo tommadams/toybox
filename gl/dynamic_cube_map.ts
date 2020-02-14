@@ -4,7 +4,7 @@ import * as vec3 from 'toybox/math/vec3';
 import {GL} from 'toybox/gl/constants';
 import {Context} from 'toybox/gl/context';
 import {Framebuffer} from 'toybox/gl/framebuffer';
-import {Texture2DDef} from 'toybox/gl/texture';
+import {Texture2D, TextureCube, TextureCubeDef} from 'toybox/gl/texture';
 
 let tmp = vec3.newZero();
 
@@ -35,46 +35,40 @@ export class DynamicCubeMap {
   // Per-face data.
   faces: DynamicCubeMap.Face[] = [];
 
+  // Color cube map.
+  color: TextureCube;
+
+  // 2D depth texture shared between all faces.
+  depth: Texture2D;
+
   // Resolution of each faces.
   size = 0;
 
-  // TODO(tom): add an option to share the same depth buffer between all faces.
-  constructor(ctx: Context, colorDef: null | Texture2DDef, depthDef: null | Texture2DDef,
+  // TODO(tom): add support for depth-only cube maps.
+  constructor(ctx: Context, options: TextureCubeDef,
               public near: number, public far: number) {
-    if (colorDef != null) {
-      this.checkDimensions(colorDef);
-    }
-    if (depthDef != null) {
-      this.checkDimensions(depthDef);
-    }
-    vec3.setZero(tmp);
+    // Create a cube texture.
+    this.color = ctx.newTextureCube(options);
+
+    // Create a 2D depth texture that will be shared between faces.
+    // TODO(tom): support depth-only, no-depth, and different depth precisions.
+    this.depth = ctx.newTexture2D({size: options.size, format: GL.DEPTH_COMPONENT16});
+
+    let eyePos = vec3.setZero(tmp);
     this.proj = mat4.newPerspective(0.5 * Math.PI, 1, near, far);
     for (let i = 0; i < 6; ++i) {
-      let fb = ctx.newFramebuffer(colorDef, depthDef, GL.TEXTURE_CUBE_MAP_POSITIVE_X + i);
-      let view = mat4.newLookAt(tmp, TARGET[i], UP[i]);
+      let fb = ctx.newFramebuffer(this.color, this.depth, GL.TEXTURE_CUBE_MAP_POSITIVE_X + i);
+      let view = mat4.newLookAt(eyePos, TARGET[i], UP[i]);
       this.faces.push(new DynamicCubeMap.Face(NAME[i], fb, view, this.proj));
     }
   }
 
-  setOrigin(o: vec3.ArgType) {
+  setOrigin(origin: vec3.ArgType) {
     for (let i = 0; i < 6; ++i) {
       let face = this.faces[i];
-      vec3.add(tmp, o, TARGET[i]);
-      mat4.setLookAt(face.view, o, tmp, UP[i]);
+      let target = vec3.add(tmp, origin, TARGET[i]);
+      mat4.setLookAt(face.view, origin, target, UP[i]);
       mat4.mul(face.viewProj, this.proj, face.view);
-    }
-  }
-
-  private checkDimensions(def: Texture2DDef) {
-    let w = def.width || def.size;
-    let h = def.height || def.size;
-    if (w != h) {
-      throw new Error(`expected square faces, got${w}x${h}`);
-    }
-    if (this.size == 0) {
-      this.size = w;
-    } else if (this.size != w) {
-      throw new Error(`expected ${this.size}x${this.size}, got ${w}x${h}`);
     }
   }
 }

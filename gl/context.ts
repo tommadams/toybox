@@ -3,7 +3,7 @@ import {Framebuffer} from 'toybox/gl/framebuffer';
 import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, SamplerParameter, TextureTarget} from 'toybox/gl/constants';
 import {ShaderRegistry} from 'toybox/gl/shader_registry';
 import {Profiler} from 'toybox/gl/profiler';
-import {Texture2D, Texture2DDef} from 'toybox/gl/texture';
+import {Texture, Texture2D, Texture2DDef, TextureCube, TextureCubeDef} from 'toybox/gl/texture';
 import {Buffer, VertexArray, VertexArrayDef, VertexBuffer, VertexBufferDef} from 'toybox/gl/vertex_array';
 import {memoize} from 'toybox/util/memoize';
 
@@ -24,8 +24,8 @@ export interface ContextOptions {
   profileHud?: string | HTMLElement;
 }
 
-function isTexture2D(x: Texture2D | Texture2DDef): x is Texture2D {
-  return (<Texture2D>x).handle !== undefined;
+function isTexture(x: Texture | Texture2DDef): x is Texture {
+  return (<Texture>x).handle !== undefined;
 }
 
 export class Context {
@@ -210,18 +210,22 @@ export class Context {
     return new Texture2D(this, options);
   }
 
+  newTextureCube(options: TextureCubeDef) {
+    return new TextureCube(this, options);
+  }
+
   newTexture2DFromElem(elem: HTMLImageElement) {
     return new Texture2D(this, {elem: elem});
   }
 
-  newFramebuffer(color: null | Texture2D | Texture2DDef | Array<Texture2D | Texture2DDef>,
+  newFramebuffer(color: null | Texture | Texture2DDef | Array<Texture | Texture2DDef>,
                  depth?: null | Texture2D | Texture2DDef, target: TextureTarget = GL.TEXTURE_2D) {
-    let colorTex: null | Texture2D | Array<Texture2D>;
+    let colorTex: null | Texture | Texture[];
     let depthTex: null | Texture2D | undefined;
 
     if (color) {
       if (Array.isArray(color)) {
-        colorTex = new Array<Texture2D>();
+        colorTex = new Array<Texture>();
         for (let c of color) {
           colorTex.push(this.coerceTex(c));
         };
@@ -232,7 +236,7 @@ export class Context {
       colorTex = null;
     }
 
-    if (depth !== undefined) {
+    if (depth != null) {
       if ((<Texture2D>depth).handle !== undefined) {
         depthTex = <Texture2D>depth;
       } else {
@@ -241,7 +245,7 @@ export class Context {
     } else {
       depthTex = null;
     }
-    return new Framebuffer(this, colorTex, depthTex);
+    return new Framebuffer(this, colorTex, depthTex, target);
   }
 
   setSharedUniformBlock(name: string, uniforms: UniformBlockSetting) {
@@ -264,7 +268,7 @@ export class Context {
   }
 
   // Calls bindTexture on the currently bound shader program.
-  bindTexture(name: string, tex: Texture2D) {
+  bindTexture(name: string, tex: Texture) {
     this.boundShader.bindTexture(name, tex);
   }
 
@@ -349,7 +353,7 @@ export class Context {
   }
 
   private coerceTex(tex: Texture2D | Texture2DDef) {
-    if (isTexture2D(tex)) {
+    if (isTexture(tex)) {
       return tex;
     } else {
       return this.newTexture2D(tex);

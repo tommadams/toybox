@@ -4,7 +4,7 @@ import * as vec4 from 'toybox/math/vec4'
 import {Context} from 'toybox/gl/context'
 import {GL} from 'toybox/gl/constants'
 import {ShaderProgram} from 'toybox/gl/shader'
-import {Texture2D} from 'toybox/gl/texture'
+import {Texture} from 'toybox/gl/texture'
 import {TypedArrayList} from 'toybox/util/array'
 import {VertexArray} from 'toybox/gl/vertex_array'
 
@@ -394,7 +394,7 @@ export class DynamicDraw {
     }
   }
 
-  private blitImpl(shader: ShaderProgram, tex: Texture2D,
+  private blitImpl(shader: ShaderProgram, tex: Texture,
                    x: number, y: number, w: number, h: number) {
     const gl = this.ctx.gl;
 
@@ -420,15 +420,17 @@ export class DynamicDraw {
       gl.bindSampler(0, this.depthSampler);
     }
     this.ctx.draw(this.blitVa);
-    gl.bindSampler(0, null);
+    if (tex.compareMode == GL.COMPARE_REF_TO_TEXTURE) {
+      gl.bindSampler(0, null);
+    }
   }
 
-  blitR(tex: Texture2D, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['RED'], tex, x, y, w, h); }
-  blitG(tex: Texture2D, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['GREEN'], tex, x, y, w, h); }
-  blitB(tex: Texture2D, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['BLUE'], tex, x, y, w, h); }
-  blitA(tex: Texture2D, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['ALPHA'], tex, x, y, w, h); }
-  blitRgb(tex: Texture2D, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['RGB'], tex, x, y, w, h); }
-  blitRgba(tex: Texture2D, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['RGBA'], tex, x, y, w, h); }
-  blitDepth(tex: Texture2D, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['DEPTH'], tex, x, y, w, h); }
+  blitR(tex: Texture, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['RED'], tex, x, y, w, h); }
+  blitG(tex: Texture, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['GREEN'], tex, x, y, w, h); }
+  blitB(tex: Texture, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['BLUE'], tex, x, y, w, h); }
+  blitA(tex: Texture, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['ALPHA'], tex, x, y, w, h); }
+  blitRgb(tex: Texture, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['RGB'], tex, x, y, w, h); }
+  blitRgba(tex: Texture, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['RGBA'], tex, x, y, w, h); }
+  blitDepth(tex: Texture, x: number, y: number, w: number, h: number) { this.blitImpl(this.shaders['DEPTH'], tex, x, y, w, h); }
 }
 

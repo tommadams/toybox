@@ -1,7 +1,7 @@
 import {Context} from 'toybox/gl/context'
 import {GL, DataType} from 'toybox/gl/constants'
 import {NumericArray, TypedArray} from 'toybox/util/array'
-import {Texture2D} from 'toybox/gl/texture'
+import {Texture} from 'toybox/gl/texture'
 
 interface ErrorConstructor {
   captureStackTrace(thisArg: any, func: any): void;
@@ -480,10 +480,10 @@ export class ShaderProgram {
     }
   }
 
-  bindTexture(name: string, tex: Texture2D) {
+  bindTexture(name: string, tex: Texture) {
     const gl = this.ctx.gl;
     gl.activeTexture(GL.TEXTURE0 + this.samplers[name].texunit);
-    gl.bindTexture(GL.TEXTURE_2D, tex.handle)
+    gl.bindTexture(tex.target, tex.handle)
   }
 }
 

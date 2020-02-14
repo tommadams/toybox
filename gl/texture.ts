@@ -1,5 +1,5 @@
 import {Context} from 'toybox/gl/context'
-import {DataType, GL, TextureInternalFormat, TextureMinFilter, TextureWrap} from 'toybox/gl/constants'
+import {DataType, GL, TextureCompareMode, TextureInternalFormat, TextureMinFilter, TextureTarget, TextureWrap} from 'toybox/gl/constants'
 
 export function inferType(internalFormat: TextureInternalFormat) {
   switch (internalFormat) {
@@ -125,6 +125,13 @@ export function inferFormat(internalFormat: TextureInternalFormat) {
   throw new Error(`unrecognized internal format ${internalFormat}`);
 }
 
+export abstract class Texture {
+  constructor(
+      public handle: WebGLTexture, public width: number, public height: number,
+      public compareMode: TextureCompareMode) {}
+  abstract get target(): TextureTarget;
+}
+
 export interface Texture2DDef {
   width?: number;
   height?: number;
@@ -138,20 +145,18 @@ export interface Texture2DDef {
 }
 
 // TODO(tom): sampler objects
-export class Texture2D {
-  public handle: WebGLTexture;
-  public width: number;
-  public height: number;
-  public filter: number;
-  public wrap: number;
-  public internalFormat: TextureInternalFormat;
-  public compareMode: number;
+export class Texture2D extends Texture {
+  filter: number;
+  wrap: number;
+  internalFormat: TextureInternalFormat;
 
   constructor(ctx: Context, options: Texture2DDef) {
     const gl = ctx.gl;
-    this.handle = gl.createTexture();
-    this.width = options.width || options.size || 0;
-    this.height = options.height || options.size || 0;
+    super(gl.createTexture(),
+          options.width || options.size || 0,
+          options.height || options.size || 0,
+          options.shadow ? GL.COMPARE_REF_TO_TEXTURE : GL.NONE);
+
     this.filter = options.filter || GL.NEAREST;
     this.wrap = options.wrap || GL.CLAMP_TO_EDGE;
     this.internalFormat = options.format;
@@ -176,7 +181,6 @@ export class Texture2D {
       }
       const data = options.data || null;
       if (options.shadow) {
-        this.compareMode = GL.COMPARE_REF_TO_TEXTURE;
         gl.texParameteri(
             GL.TEXTURE_2D, GL.TEXTURE_COMPARE_MODE, this.compareMode);
         gl.texParameteri(
@@ -187,6 +191,44 @@ export class Texture2D {
           format, type, data);
     }
   }
+
+  get target(): TextureTarget { return GL.TEXTURE_2D; }
+}
+
+export interface TextureCubeDef {
+  size: number;
+  filter?: TextureMinFilter;
+  format: TextureInternalFormat;
+}
+
+export class TextureCube extends Texture {
+  size: number;
+  filter: number;
+  internalFormat: TextureInternalFormat;
+
+  constructor(ctx: Context, options: Texture2DDef) {
+    const gl = ctx.gl;
+    super(gl.createTexture(), options.size, options.size, GL.NONE);
+
+    this.size = options.size;
+    this.filter = options.filter || GL.NEAREST;
+    this.internalFormat = options.format;
+
+    let type = inferType(this.internalFormat);
+    let format = inferFormat(this.internalFormat);
+
+    gl.bindTexture(GL.TEXTURE_CUBE_MAP, this.handle);
+    gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_FILTER, this.filter);
+    gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAG_FILTER, getMagFilter(this.filter));
+
+    for (let i = 0; i < 6; ++i) {
+      gl.texImage2D(
+          GL.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, this.internalFormat,
+          this.size, this.size, 0, format, type, null);
+    }
+  }
+
+  get target(): TextureTarget { return GL.TEXTURE_CUBE_MAP; }
 }
 
 export function getMagFilter(minFilter: TextureMinFilter) {

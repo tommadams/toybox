@@ -1,16 +1,16 @@
 import {Context} from 'toybox/gl/context'
 import {GL, TextureTarget} from 'toybox/gl/constants'
-import {Texture2D} from 'toybox/gl/texture'
+import {Texture, Texture2D, TextureCube} from 'toybox/gl/texture'
 
 export class Framebuffer {
   handle: WebGLFramebuffer;
   width = 0;
   height = 0;
-  color = new Array<Texture2D>();
+  color = new Array<Texture>();
   depth: Texture2D = null;
 
-  constructor(ctx: Context, color: null | Texture2D | Texture2D[],
-              depth: Texture2D = null, target: TextureTarget = GL.TEXTURE_2D) {
+  constructor(ctx: Context, color: null | Texture | Texture[],
+              depth: null | Texture2D, target: TextureTarget) {
     const gl = ctx.gl;
     this.handle = gl.createFramebuffer();
 
@@ -22,7 +22,7 @@ export class Framebuffer {
         this.checkDimensions(tex);
         this.color.push(tex);
       };
-    } else if (color instanceof Texture2D) {
+    } else if (color != null) {
       this.checkDimensions(color);
       this.color.push(color);
     }
@@ -39,11 +39,11 @@ export class Framebuffer {
     });
     if (this.depth) {
       gl.framebufferTexture2D(
-          GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, target, this.depth.handle, 0);
+          GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.TEXTURE_2D, this.depth.handle, 0);
     }
   }
 
-  private checkDimensions(tex: Texture2D) {
+  private checkDimensions(tex: Texture) {
     if (this.width == 0) {
       this.width = tex.width;
       this.height = tex.height;
