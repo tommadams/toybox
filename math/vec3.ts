@@ -216,3 +216,10 @@ export function perpendicular(dst: Type, a: ArgType) {
   cross(dst, v, a);
   return normalize(dst, dst);
 }
+
+// Sets dst to the vector i reflected about normal n.
+// To produce correct result, n must be normalized.
+export function reflect(dst: Type, i: Type, n: Type) {
+  addScaled(dst, i, n, -2 * dot(n, i));
+  return dst;
+}
