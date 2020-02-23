@@ -69,6 +69,8 @@ export class Context {
 
   public init: () => void;
 
+  public initialized = false;
+
   constructor(public canvas: HTMLCanvasElement, options: ContextOptions) {
     options = options || {};
     this.gl = canvas.getContext('webgl2', options) as WebGL2RenderingContext;
@@ -105,7 +107,9 @@ export class Context {
     // Vertex attrib bindings.
     this.maxVertexAttribs = this.gl.getParameter(GL.MAX_VERTEX_ATTRIBS);
 
-    this.promises = [new Promise((resolve) => { this.init = resolve; })];
+    this.promises = [new Promise((resolve) => {
+      this.init = resolve;
+    })];
 
     const supportedExtensions = this.gl.getSupportedExtensions().join('\n  ');
     console.log(`Supported extensions:\n  ${supportedExtensions}`);
@@ -140,6 +144,7 @@ export class Context {
     let len = this.promises.length;
     Promise.all(this.promises).then(() => { 
       if (len == this.promises.length) {
+        this.initialized = true;
         fn();
       } else {
         this.onInit(fn);

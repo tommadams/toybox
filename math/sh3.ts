@@ -18,16 +18,16 @@ const A_2 = Math.PI / 4;
 const Y_0_0 = Math.sqrt(1 / pi4);
 
 // Second band.
-const Yn1_1 = Math.sqrt(3 / pi4);
-const Y_0_1 = Math.sqrt(3 / pi4);
-const Yp1_1 = Math.sqrt(3 / pi4);
+const Y_1n1 = Math.sqrt(3 / pi4);
+const Y_1_0 = Math.sqrt(3 / pi4);
+const Y_1p1 = Math.sqrt(3 / pi4);
 
 // Third band.
-const Yn2_2 = Math.sqrt(15 / pi4);
-const Yn1_2 = Math.sqrt(15 / pi4);
-const Y_0_2 = Math.sqrt(5 / pi16);
-const Yp1_2 = Math.sqrt(15 / pi4);
-const Yp2_2 = Math.sqrt(15 / pi16);
+const Y_2n2 = Math.sqrt(15 / pi4);
+const Y_2n1 = Math.sqrt(15 / pi4);
+const Y_2_0 = Math.sqrt(5 / pi16);
+const Y_2p1 = Math.sqrt(15 / pi4);
+const Y_2p2 = Math.sqrt(15 / pi16);
 
 export function newZero() {
   return new Float32Array(27);
@@ -48,42 +48,42 @@ export function project(dst: Type, col: vec3.ArgType, dir: vec3.ArgType) {
   dst[1] += c * g;
   dst[2] += c * b;
 
-  c = Yn1_1 * y;
+  c = Y_1n1 * y;
   dst[3] += c * r;
   dst[4] += c * g;
   dst[5] += c * b;
 
-  c = Y_0_1 * z;
+  c = Y_1_0 * z;
   dst[6] += c * r;
   dst[7] += c * g;
   dst[8] += c * b;
 
-  c = Yp1_1 * x;
+  c = Y_1p1 * x;
   dst[9]  += c * r;
   dst[10] += c * g;
   dst[11] += c * b;
 
-  c = Yn2_2 * x * y;
+  c = Y_2n2 * x * y;
   dst[12] += c * r;
   dst[13] += c * g;
   dst[14] += c * b;
 
-  c = Yn1_2 * y * z;
+  c = Y_2n1 * y * z;
   dst[15] += c * r;
   dst[16] += c * g;
   dst[17] += c * b;
 
-  c = Y_0_2 * (3 * z * z - 1);
+  c = Y_2_0 * (3 * z * z - 1);
   dst[18] += c * r;
   dst[19] += c * g;
   dst[20] += c * b;
 
-  c = Yp1_2 * z * x;
+  c = Y_2p1 * z * x;
   dst[21] += c * r;
   dst[22] += c * g;
   dst[23] += c * b;
 
-  c = Yp2_2 * (x * x - y * y);
+  c = Y_2p2 * (x * x - y * y);
   dst[24] += c * r;
   dst[25] += c * g;
   dst[26] += c * b;
@@ -138,43 +138,43 @@ export function evalDirection(dst: vec3.Type, sh: Type, dir: vec3.Type) {
   let b = c * sh[2];
 
   // Second band.
-  c = Yn1_1 * y;
+  c = Y_1n1 * y;
   r += c * sh[3];
   g += c * sh[4];
   b += c * sh[5];
 
-  c = Y_0_1 * z;
+  c = Y_1_0 * z;
   r += c * sh[6];
   g += c * sh[7];
   b += c * sh[8];
 
-  c = Yp1_1 * x;
+  c = Y_1p1 * x;
   r += c * sh[9];
   g += c * sh[10];
   b += c * sh[11];
 
   // Third band.
-  c = Yn2_2 * x * y;
+  c = Y_2n2 * x * y;
   r += c * sh[12];
   g += c * sh[13];
   b += c * sh[14];
 
-  c = Yn1_2 * y * z;
+  c = Y_2n1 * y * z;
   r += c * sh[15];
   g += c * sh[16];
   b += c * sh[17];
 
-  c = Y_0_2 * (3 * z * z - 1);
+  c = Y_2_0 * (3 * z * z - 1);
   r += c * sh[18];
   g += c * sh[19];
   b += c * sh[20];
 
-  c = Yp1_2 * z * x;
+  c = Y_2p1 * z * x;
   r += c * sh[21];
   g += c * sh[22];
   b += c * sh[23];
 
-  c = Yp2_2 * (x * x - y * y);
+  c = Y_2p2 * (x * x - y * y);
   r += c * sh[24];
   g += c * sh[25];
   b += c * sh[26];

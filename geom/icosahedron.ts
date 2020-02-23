@@ -75,5 +75,5 @@ const edgeIndices = [
   11, 10,  11, 9,  11, 8,  11, 7,  11, 6,
 ];
 
-export let mesh = {positions, faceIndices, edgeIndices};
+export let mesh = new Mesh(positions, faceIndices, edgeIndices);
 export let flatMesh = flatten(mesh);

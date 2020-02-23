@@ -3,7 +3,16 @@
 
 import {linearFloatToSrgbByteAccurate} from 'toybox/color/srgb';
 import * as vec3 from 'toybox/math/vec3';
+import * as mat4 from 'toybox/math/mat4';
 import * as sh3 from 'toybox/math/sh3';
+
+import * as icosphere from 'toybox/geom/icosphere';
+import {Context} from 'toybox/gl/context';
+import {GL} from 'toybox/gl/constants';
+import {DynamicDraw} from 'toybox/gl/dynamic_draw';
+
+import * as SH from 'toybox/math/sh_generic';
+
 
 // Light probe size in pixels.
 let size = 250;
@@ -52,6 +61,7 @@ function unmap(dst: vec3.Type, u: number, v: number) {
   let ct = Math.cos(theta);
   let sp = Math.sin(phi);
   let cp = Math.cos(phi);
+
   vec3.setFromValues(dst, -sp * ct, -sp * st, -cp);
 
   // Projected solid angle.
@@ -63,7 +73,27 @@ function unmap(dst: vec3.Type, u: number, v: number) {
   }
 }
 
+function generateSamples(samples: vec3.Type[], sqrtSampleCount: number) {
+  let i = 0;
+  let oneoverN = 1 / sqrtSampleCount;
+  for (let a = 0; a < sqrtSampleCount; ++a) {
+    for (let b = 0; b < sqrtSampleCount; ++b) {
+      let x = (a + Math.random()) * oneoverN;
+      let y = (b + Math.random()) * oneoverN;
+      let theta = 2.0 * Math.acos(Math.sqrt(1.0 - x));
+      let phi = 2.0 * Math.PI * y;
+      vec3.setFromValues(
+          samples[i++],
+          Math.sin(theta) * Math.cos(phi),
+          Math.sin(theta) * Math.sin(phi),
+          Math.cos(theta));
+    }
+  }
+}
+
 function run(buf: ArrayBuffer) {
+  let start = Date.now();
+
   let src = new Float32Array(buf);
 
   let dir = vec3.newZero();
@@ -90,7 +120,7 @@ function run(buf: ArrayBuffer) {
   sh3.radianceToIrradiance(sh, sh);
 
   // Expand out of SH.
-  let irradiance = new Float32Array(size * size * 3);
+  let shIrradiance = new Float32Array(size * size * 3);
   for (let j = 0; j < size; ++j) {
     let v = 2 * (j + 0.5) / size - 1;
     for (let i=0; i<size; ++i) {
@@ -101,14 +131,75 @@ function run(buf: ArrayBuffer) {
       sh3.evalDirection(col, sh, dir);
 
       let idx = 3 * (j * size + i);
-      irradiance[idx + 0] = col[0];
-      irradiance[idx + 1] = col[1];
-      irradiance[idx + 2] = col[2];
+      shIrradiance[idx + 0] = col[0];
+      shIrradiance[idx + 1] = col[1];
+      shIrradiance[idx + 2] = col[2];
     }
   }
 
-  document.body.appendChild(createCanvas(linearFloatToSrgbByteAccurate(src, 2.5), size, size));
-  document.body.appendChild(createCanvas(linearFloatToSrgbByteAccurate(irradiance, 2.5), size, size));
+  // Diffuse convolution via Monte Carlo sampling
+  let mcIrradiance = new Float32Array(size * size * 3);
+  let sqrtSampleCount = 32;
+  let sampleCount = sqrtSampleCount * sqrtSampleCount;
+  let samples: vec3.Type[] = [];
+  for (let i = 0; i < sampleCount; ++i) {
+    samples[i] = vec3.newZero();
+  }
+
+  let N = vec3.newZero();
+  let C = vec3.newZero();
+  for (let j=0; j<size; ++j) {
+    console.log(`${j+1} / ${size}`);
+    let v = 2 * (j + 0.5) / size - 1;
+    for (let i=0; i<size; ++i) {
+      let u = 2 * (i + 0.5) / size - 1;
+      if (u*u + v*v > 1) { continue; }
+
+      unmap(N, u, v);
+
+      generateSamples(samples, sqrtSampleCount);
+
+      vec3.setZero(C);
+      for (let sampleIdx = 0; sampleIdx < sampleCount; ++sampleIdx) {
+        let D = samples[sampleIdx];
+        let dot = vec3.dot(D, N);
+        if (dot <= 0) {
+          dot = -dot;
+        } else {
+          vec3.neg(D, D);
+        }
+
+        let r = (1/Math.PI) * Math.acos(D[2]) / Math.sqrt(D[0]*D[0] + D[1]*D[1]);
+        let UU = 0.5 + 0.5 * D[0] * r;
+        let VV = 0.5 + 0.5 * D[1] * r;
+        let srcu = (size * UU)|0;
+        let srcv = (size * VV)|0;
+        if (srcu < 0) srcu = 0;
+        if (srcv < 0) srcv = 0;
+        if (srcu >= size) srcu = size-1;
+        if (srcv >= size) srcv = size-1;
+
+        let srcIdx = 3*(srcu + srcv*size);
+        C[0] += dot * src[srcIdx+0];
+        C[1] += dot * src[srcIdx+1];
+        C[2] += dot * src[srcIdx+2];
+      }
+
+      vec3.scale(C, 2 * Math.PI / sampleCount, C);
+      mcIrradiance[(i+j*size)*3 + 0] = C[0];
+      mcIrradiance[(i+j*size)*3 + 1] = C[1];
+      mcIrradiance[(i+j*size)*3 + 2] = C[2];
+    }
+  }
+
+  let append = (img: Float32Array) => {
+    document.body.appendChild(createCanvas(linearFloatToSrgbByteAccurate(img, 2.5), size, size));
+  };
+  append(src);
+  append(shIrradiance);
+  append(mcIrradiance);
+
+  console.log(`took ${((Date.now() - start) / 1000).toFixed(2)}s`);
 }
 
 let req = new XMLHttpRequest();

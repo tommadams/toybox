@@ -108,14 +108,24 @@ void main() {
 
 // TODO(tom): convert DynamicDraw to use the new DynamicVertexBuffer class.
 export class DynamicDraw {
-  private lines = new TypedArrayList(Float32Array);
-  private triangles = new TypedArrayList(Float32Array);
+  lines = new TypedArrayList(Float32Array);
+  triangles = new TypedArrayList(Float32Array);
   private depthSampler: WebGLSampler;
   private shaders: {[index: string]: ShaderProgram};
   private flatVa: VertexArray;
   private blitVa: VertexArray;
 
   constructor(public ctx: Context) {
+    if (ctx.initialized) {
+      // TODO(tom): Because Context.newShaderProgram creates promises that get resolved
+      // during Context.init, DynamicDraw must be constructed before the Context is
+      // initialized. Relax this requirement by changing Context.newShaderProgram to
+      // try and create the program directly all shader sources have been previously
+      // loaded (and throw an exception if at least one source isn't loaded and the
+      // context is initialized).
+      throw new Error('DynamicDraw must be constructed before initializing the Context');
+    }
+
     const gl = ctx.gl;
 
     this.ctx.shaderRegistry.register('draw.flat.vs', flatVsSrc);

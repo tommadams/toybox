@@ -8,6 +8,14 @@ export class Mesh {
   constructor(public positions: vec3.Type[],
               public faceIndices: number[],
               public edgeIndices: number[]) {}
+
+  clone() {
+    let p = new Array<vec3.Type>(this.positions.length);
+    for (let i = 0; i < p.length; ++i) {
+      p[i] = vec3.newFromVec(this.positions[i]);
+    }
+    return new Mesh(p, this.faceIndices.slice(0), this.edgeIndices.slice(0));
+  }
 }
 
 // Flattened mesh representation.
