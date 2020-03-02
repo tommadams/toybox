@@ -1,11 +1,12 @@
 import {Block, Shader, ShaderDefines, ShaderProgram, UniformBlockSetting} from 'toybox/gl/shader';
 import {Framebuffer} from 'toybox/gl/framebuffer';
-import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, SamplerParameter, TextureTarget} from 'toybox/gl/constants';
+import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, ReadBuffer, SamplerParameter, TextureFormat, TextureTarget, TextureType} from 'toybox/gl/constants';
 import {ShaderRegistry} from 'toybox/gl/shader_registry';
 import {Profiler} from 'toybox/gl/profiler';
 import {Texture, Texture2D, Texture2DDef, TextureCube, TextureCubeDef} from 'toybox/gl/texture';
 import {Buffer, VertexArray, VertexArrayDef, VertexBuffer, VertexBufferDef} from 'toybox/gl/vertex_array';
 import {memoize} from 'toybox/util/memoize';
+import {TypedArray} from 'toybox/util/array';
 
 export interface ContextOptions {
   sharedUniformBlocks?: string[];
@@ -350,6 +351,15 @@ export class Context {
 
   samplerParamteri(sampler: WebGLSampler, pname: SamplerParameter, param: GLint) { this.gl.samplerParameteri(sampler, pname, param); }
   samplerParamterf(sampler: WebGLSampler, pname: SamplerParameter, param: GLfloat) { this.gl.samplerParameteri(sampler, pname, param); }
+
+  readBuffer(src: ReadBuffer) { this.gl.readBuffer(src); }
+
+  // TODO(tom): add support for PIXEL_PACK_BUFFER to avoid blocking:
+  //   https://www.khronos.org/registry/webgl/specs/latest/2.0/#3.7.10
+  readPixels(x: GLint, y: GLint, width: GLsizei, height: GLsizei, format: TextureFormat,
+             type: TextureType, pixels: TypedArray, offset=0) {
+    this.gl.readPixels(x, y, width, height, format, type, pixels, offset);
+  }
 
   viewport(x: GLint = 0, y: GLint = 0, w?: GLsizei, h?: GLsizei) {
     if (w === undefined) { w = this.canvas.width; }

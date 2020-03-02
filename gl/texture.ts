@@ -1,7 +1,7 @@
 import {Context} from 'toybox/gl/context'
-import {DataType, GL, TextureCompareMode, TextureInternalFormat, TextureMinFilter, TextureTarget, TextureWrap} from 'toybox/gl/constants'
+import {DataType, GL, TextureCompareMode, TextureInternalFormat, TextureFormat, TextureMinFilter, TextureTarget, TextureType, TextureWrap} from 'toybox/gl/constants'
 
-export function inferType(internalFormat: TextureInternalFormat) {
+export function inferType(internalFormat: TextureInternalFormat): TextureType {
   switch (internalFormat) {
     case GL.RGBA4:
       return GL.UNSIGNED_SHORT_4_4_4_4
@@ -63,7 +63,7 @@ export function inferType(internalFormat: TextureInternalFormat) {
   throw new Error(`unrecognized internal format ${internalFormat}`);
 }
 
-export function inferFormat(internalFormat: TextureInternalFormat) {
+export function inferFormat(internalFormat: TextureInternalFormat): TextureFormat {
   switch (internalFormat) {
     case GL.RGBA8: case GL.RGB5_A1: case GL.RGBA4: case GL.SRGB8_ALPHA8:
     case GL.RGBA8_SNORM: case GL.RGBA4: case GL.RGB5_A1: case GL.RGB10_A2:
@@ -126,9 +126,15 @@ export function inferFormat(internalFormat: TextureInternalFormat) {
 }
 
 export abstract class Texture {
+  type: TextureType;
+  format: TextureFormat;
   constructor(
       public handle: WebGLTexture, public width: number, public height: number,
-      public compareMode: TextureCompareMode) {}
+      public internalFormat: TextureInternalFormat,
+      public compareMode: TextureCompareMode) {
+    this.type = inferType(this.internalFormat);
+    this.format = inferFormat(this.internalFormat);
+  }
   abstract get target(): TextureTarget;
 }
 
@@ -148,22 +154,18 @@ export interface Texture2DDef {
 export class Texture2D extends Texture {
   filter: number;
   wrap: number;
-  internalFormat: TextureInternalFormat;
 
   constructor(ctx: Context, options: Texture2DDef) {
     const gl = ctx.gl;
     super(gl.createTexture(),
           options.width || options.size || 0,
           options.height || options.size || 0,
+          options.format,
           options.shadow ? GL.COMPARE_REF_TO_TEXTURE : GL.NONE);
 
     this.filter = options.filter || GL.NEAREST;
     this.wrap = options.wrap || GL.CLAMP_TO_EDGE;
-    this.internalFormat = options.format;
     this.compareMode = GL.NONE;
-
-    let type = inferType(this.internalFormat);
-    let format = inferFormat(this.internalFormat);
 
     gl.bindTexture(GL.TEXTURE_2D, this.handle);
     gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, this.wrap);
@@ -174,7 +176,7 @@ export class Texture2D extends Texture {
     if (options.elem) {
       this.width = options.elem.width;
       this.height = options.elem.height;
-      gl.texImage2D(GL.TEXTURE_2D, 0, format, format, type, options.elem);
+      gl.texImage2D(GL.TEXTURE_2D, 0, this.format, this.format, this.type, options.elem);
     } else {
       if (!this.internalFormat) {
         throw new Error(`interalFormat is required`);
@@ -188,7 +190,7 @@ export class Texture2D extends Texture {
       }
       gl.texImage2D(
           GL.TEXTURE_2D, 0, this.internalFormat, this.width, this.height, 0,
-          format, type, data);
+          this.format, this.type, data);
     }
   }
 
@@ -204,18 +206,13 @@ export interface TextureCubeDef {
 export class TextureCube extends Texture {
   size: number;
   filter: number;
-  internalFormat: TextureInternalFormat;
 
   constructor(ctx: Context, options: Texture2DDef) {
     const gl = ctx.gl;
-    super(gl.createTexture(), options.size, options.size, GL.NONE);
+    super(gl.createTexture(), options.size, options.size, options.format, GL.NONE);
 
     this.size = options.size;
     this.filter = options.filter || GL.NEAREST;
-    this.internalFormat = options.format;
-
-    let type = inferType(this.internalFormat);
-    let format = inferFormat(this.internalFormat);
 
     gl.bindTexture(GL.TEXTURE_CUBE_MAP, this.handle);
     gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_FILTER, this.filter);
@@ -224,7 +221,7 @@ export class TextureCube extends Texture {
     for (let i = 0; i < 6; ++i) {
       gl.texImage2D(
           GL.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, this.internalFormat,
-          this.size, this.size, 0, format, type, null);
+          this.size, this.size, 0, this.format, this.type, null);
     }
   }
 

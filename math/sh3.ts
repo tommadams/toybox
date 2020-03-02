@@ -4,7 +4,6 @@ import * as vec3 from 'toybox/math/vec3';
 import {NumericArray} from 'toybox/util/array'
 
 export type Type = Float32Array;
-export type ArgType = NumericArray;
 
 const pi4 = 4 * Math.PI;
 const pi16 = 16 * Math.PI;
@@ -29,8 +28,50 @@ const Y_2_0 = Math.sqrt(5 / pi16);
 const Y_2p1 = Math.sqrt(15 / pi4);
 const Y_2p2 = Math.sqrt(15 / pi16);
 
+// console.log(pi4, pi16);
+// console.log(A_0, A_1, A_2);
+// console.log(Y_0_0);
+// console.log(Y_1n1, Y_1_0, Y_1p1);
+// console.log(Y_2n2, Y_2n1, Y_2_0, Y_2p1, Y_2p2);
+
 export function newZero() {
   return new Float32Array(27);
+}
+
+export function setZero(dst: Type) {
+  dst.fill(0);
+}
+
+export function setFromSh(dst: Type, src: Type) {
+  dst[0] = src[0];
+  dst[1] = src[1];
+  dst[2] = src[2];
+  dst[3] = src[3];
+  dst[4] = src[4];
+  dst[5] = src[5];
+  dst[6] = src[6];
+  dst[7] = src[7];
+  dst[8] = src[8];
+  dst[9] = src[9];
+
+  dst[10] = src[10];
+  dst[11] = src[11];
+  dst[12] = src[12];
+  dst[13] = src[13];
+  dst[14] = src[14];
+  dst[15] = src[15];
+  dst[16] = src[16];
+  dst[17] = src[17];
+  dst[18] = src[18];
+  dst[19] = src[19];
+
+  dst[20] = src[20];
+  dst[21] = src[21];
+  dst[22] = src[22];
+  dst[23] = src[23];
+  dst[24] = src[24];
+  dst[25] = src[25];
+  dst[26] = src[26];
 }
 
 export function project(dst: Type, col: vec3.ArgType, dir: vec3.ArgType) {
@@ -89,7 +130,7 @@ export function project(dst: Type, col: vec3.ArgType, dir: vec3.ArgType) {
   dst[26] += c * b;
 }
 
-export function radianceToIrradiance(dst: Type, src: ArgType) {
+export function radianceToIrradiance(dst: Type, src: Type) {
   // First band.
   dst[0]  = A_0 * src[0];
   dst[1]  = A_0 * src[1];
@@ -124,7 +165,7 @@ export function radianceToIrradiance(dst: Type, src: ArgType) {
   dst[26] = A_2 * src[26];
 }
 
-export function evalDirection(dst: vec3.Type, sh: Type, dir: vec3.Type) {
+export function reconstruct(dst: vec3.Type, sh: Type, dir: vec3.Type) {
   let x = dir[0];
   let y = dir[1];
   let z = dir[2];
@@ -182,4 +223,58 @@ export function evalDirection(dst: vec3.Type, sh: Type, dir: vec3.Type) {
   dst[0] = r;
   dst[1] = g;
   dst[2] = b;
+}
+
+export function lerp(dst: Type, a: Type, b: Type, t: number) {
+  let s = 1 - t;
+  dst[0] = s * a[0] + t * b[0];
+  dst[1] = s * a[1] + t * b[1];
+  dst[2] = s * a[2] + t * b[2];
+  dst[3] = s * a[3] + t * b[3];
+  dst[4] = s * a[4] + t * b[4];
+  dst[5] = s * a[5] + t * b[5];
+  dst[6] = s * a[6] + t * b[6];
+  dst[7] = s * a[7] + t * b[7];
+  dst[8] = s * a[8] + t * b[8];
+  dst[9] = s * a[9] + t * b[9];
+
+  dst[10] = s * a[10] + t * b[10];
+  dst[11] = s * a[11] + t * b[11];
+  dst[12] = s * a[12] + t * b[12];
+  dst[13] = s * a[13] + t * b[13];
+  dst[14] = s * a[14] + t * b[14];
+  dst[15] = s * a[15] + t * b[15];
+  dst[16] = s * a[16] + t * b[16];
+  dst[17] = s * a[17] + t * b[17];
+  dst[18] = s * a[18] + t * b[18];
+  dst[19] = s * a[19] + t * b[19];
+
+  dst[20] = s * a[20] + t * b[20];
+  dst[21] = s * a[21] + t * b[21];
+  dst[22] = s * a[22] + t * b[22];
+  dst[23] = s * a[23] + t * b[23];
+  dst[24] = s * a[24] + t * b[24];
+  dst[25] = s * a[25] + t * b[25];
+  dst[26] = s * a[26] + t * b[26];
+}
+
+/**
+ * Bilinear interpolation of four SH on a unit square:
+ *   a---b
+ *   |   |
+ *   c---d
+ * @param a top-left SH
+ * @param b top-right SH
+ * @param c bottom-left SH
+ * @param d bottom-right SH
+ * @param u X interpolation factor in the range [0, 1]
+ * @param v Y interpolation factor in the range [0, 1]
+ */
+export function bilerp(dst: Type, a: Type, b: Type, c: Type, d: Type, u: number, v: number) {
+  let iu = 1 - u;
+  let iv = 1 - v;
+  for (let i = 0; i < 26; ++i) {
+    dst[i] = iv * (iu * a[i] + u * b[i]) +
+              v * (iu * c[i] + u * d[i]);
+  }
 }

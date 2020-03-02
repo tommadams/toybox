@@ -96,9 +96,32 @@ function run(buf: ArrayBuffer) {
 
   let src = new Float32Array(buf);
 
+
   let dir = vec3.newZero();
   let col = vec3.newZero();
   let sh = sh3.newZero();
+
+  /// for (let j = 0; j < size; ++j) {
+  ///   let v = 2 * (j + 0.5) / size - 1;
+  ///   for (let i=0; i<size; ++i) {
+  ///     let u = 2 * (i + 0.5) / size - 1;
+  ///     unmap(dir, u, v);
+  ///     let idx = 3 * (j * size + i);
+  ///     if (dir[1] > 0) {
+  ///       src[idx++] = 0;
+  ///       src[idx++] = 0;
+  ///       src[idx++] = 0;
+  ///     } else if (dir[0] > 0 && dir[2] < 0) {
+  ///       src[idx++] = 0.5;
+  ///       src[idx++] = 0.5;
+  ///       src[idx++] = 0.5;
+  ///     } else {
+  ///       src[idx++] = 0;
+  ///       src[idx++] = 0;
+  ///       src[idx++] = 0;
+  ///     }
+  ///   }
+  /// }
 
   // Project light probe radiance into SH.
   for (let j = 0; j < size; ++j) {
@@ -119,6 +142,8 @@ function run(buf: ArrayBuffer) {
   // Convert radiance to irradiance.
   sh3.radianceToIrradiance(sh, sh);
 
+  console.log(`sh = [${sh.join(', ')}]`);
+
   // Expand out of SH.
   let shIrradiance = new Float32Array(size * size * 3);
   for (let j = 0; j < size; ++j) {
@@ -128,7 +153,7 @@ function run(buf: ArrayBuffer) {
       if (u*u + v*v > 1) { continue; }
 
       unmap(dir, u, v);
-      sh3.evalDirection(col, sh, dir);
+      sh3.reconstruct(col, sh, dir);
 
       let idx = 3 * (j * size + i);
       shIrradiance[idx + 0] = col[0];
@@ -193,7 +218,7 @@ function run(buf: ArrayBuffer) {
   }
 
   let append = (img: Float32Array) => {
-    document.body.appendChild(createCanvas(linearFloatToSrgbByteAccurate(img, 2.5), size, size));
+    document.body.appendChild(createCanvas(linearFloatToSrgbByteAccurate(img, 0), size, size));
   };
   append(src);
   append(shIrradiance);

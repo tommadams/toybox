@@ -4,6 +4,7 @@ export type IndexArray = Uint8Array | Uint16Array | Uint32Array;
 
 // Simple mesh representation.
 // Meshes are easier to work with than FlatMeshes.
+// TODO(tom): extend this to support vertex colors & normals.
 export class Mesh {
   constructor(public positions: vec3.Type[],
               public faceIndices: number[],
