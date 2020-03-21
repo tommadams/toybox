@@ -17,7 +17,7 @@ export class Framebuffer {
     if (Array.isArray(color)) {
       for (let tex of color) {
         if (tex.width == 0 || tex.height == 0) {
-          throw new Error(`texture must have non-zero side, got ${tex.width}x${tex.height}`);
+          throw new Error(`texture must have non-zero size, got ${tex.width}x${tex.height}`);
         }
         this.checkDimensions(tex);
         this.color.push(tex);
@@ -33,10 +33,11 @@ export class Framebuffer {
     }
 
     gl.bindFramebuffer(GL.FRAMEBUFFER, this.handle);
-    this.color.forEach((tex, i) => {
+    for (let [i, tex] of this.color.entries()) {
+      gl.bindTexture(tex.target, tex.handle);
       gl.framebufferTexture2D(
           GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0 + i, target, tex.handle, 0);
-    });
+    }
     if (this.depth) {
       gl.framebufferTexture2D(
           GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.TEXTURE_2D, this.depth.handle, 0);
