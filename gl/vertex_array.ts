@@ -394,4 +394,11 @@ export class VertexArray {
       this.vbs[vb.name] = vb;
     }
   }
+
+  bindIndexBuffer(ib: IndexBuffer) {
+    const ctx = this.ctx;
+    ctx.bindVertexArray(this);
+    ctx.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, ib);
+    this.ib = ib;
+  }
 }
