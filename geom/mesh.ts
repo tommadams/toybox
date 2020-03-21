@@ -48,6 +48,13 @@ export class FlatMesh {
     this.faceIndices = faceIndices;
     this.edgeIndices = edgeIndices;
   }
+
+  clone() {
+    return new FlatMesh(
+        this.positions.slice(),
+      this.faceIndices.slice(),
+      this.edgeIndices.slice());
+  }
 }
 
 // Flattens a Mesh into a FlatMesh.

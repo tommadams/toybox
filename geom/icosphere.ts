@@ -7,13 +7,13 @@ import {Mesh, FlatMesh, flatten, subdivide} from 'toybox/geom/mesh';
 let cache: Mesh[] = [icosahedron.mesh];
 let flatCache: FlatMesh[] = [icosahedron.flatMesh];
 
-export function getMesh(numSubdivisions: number) {
+function cacheMesh(numSubdivisions: number) {
   if (numSubdivisions < 0) {
     throw new Error(`numSubdivisions must be >= 0, got ${numSubdivisions}`);
   }
   let mesh = cache[numSubdivisions];
   if (mesh === undefined) {
-    let base = getMesh(numSubdivisions - 1);
+    let base = cacheMesh(numSubdivisions - 1);
     mesh = subdivide(base.positions, base.faceIndices, base.edgeIndices);
     // Normalize the subdivided vertex positions, skiping over the vertices
     // copied from the base mesh.
@@ -23,18 +23,21 @@ export function getMesh(numSubdivisions: number) {
     }
     cache[numSubdivisions] = mesh;
   }
-
   return mesh;
 }
 
-export function getFlatMesh(numSubdivisions: number) {
+export function newMesh(numSubdivisions: number) {
+  return cacheMesh(numSubdivisions).clone();
+}
+
+export function newFlatMesh(numSubdivisions: number) {
   if (numSubdivisions < 0) {
     throw new Error(`numSubdivisions must be >= 0, got ${numSubdivisions}`);
   }
   let mesh = flatCache[numSubdivisions];
   if (mesh === undefined) {
-    mesh = flatten(getMesh(numSubdivisions));
+    mesh = flatten(cacheMesh(numSubdivisions));
     flatCache[numSubdivisions] = mesh;
   }
-  return mesh;
+  return mesh.clone();
 }
