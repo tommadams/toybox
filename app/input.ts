@@ -6,11 +6,15 @@ const events: [string, EventListener][] = [
   ['mousemove', onMouseMove],
   ['mousedown', onMouseDown],
   ['mouseup', onMouseUp],
+  ['wheel', onWheel],
 ];
 
 export let mouseDx = 0;
 export let mouseDy = 0;
+export let wheelDx = 0;
+export let wheelDy = 0;
 export let mouseDown = false;
+export let mouseDownElem: Element = null;
 
 export const enum KeyCodes {
   BACKSPACE = 8,
@@ -91,6 +95,8 @@ export function reset() {
 export function flush() {
   mouseDx = 0;
   mouseDy = 0;
+  wheelDx = 0;
+  wheelDy = 0;
   for (let i = 0; i < keysDown.length; ++i) {
     prevKeysDown[i] = keysDown[i];
   }
@@ -136,9 +142,16 @@ function onMouseMove(e: MouseEvent) {
 }
 
 function onMouseDown(e: MouseEvent) {
+  mouseDownElem = e.target as Element;
   mouseDown = true;
 }
 
 function onMouseUp(e: MouseEvent) {
+  mouseDownElem = null;
   mouseDown = false;
+}
+
+function onWheel(e: WheelEvent) {
+  wheelDx = e.deltaX;
+  wheelDy = e.deltaY;
 }
