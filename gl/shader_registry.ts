@@ -34,7 +34,7 @@ function getInstanceKey(uri: string, defines?: ShaderDefines, preamble?: string)
   return parts.join('\x00');
 }
 
-class ShaderSource {
+export class ShaderSource {
   instances = new Map<string, Shader>();
   directDeps: Set<string>;
   transitiveDeps: Set<string>;
@@ -56,6 +56,21 @@ export class ShaderRegistry {
 
   getUris(): string[] {
     return Array.from(this.sourceMap.keys()).sort();
+  }
+
+  /**
+   * @param uri a shader URI.
+   * @returns true if the given shader and all its dependencies are in the registry.
+   */
+  has(uri: string): boolean {
+    let source = this.sourceMap.get(uri);
+    if (source == null) { return false; }
+    for (let dep of source.transitiveDeps.values()) {
+      if (!this.sourceMap.has(dep)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   getSrc(uri: string): string {

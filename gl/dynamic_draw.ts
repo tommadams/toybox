@@ -31,7 +31,7 @@ enum BlitMode {
 };
 
 // Flat shaded vertex shader.
-const flatVsSrc = ` 
+const flatVsSrc = `
 uniform Camera {
   mat4 viewProj;
 } camera;

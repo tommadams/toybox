@@ -1,12 +1,20 @@
 import {Block, Shader, ShaderDefines, ShaderProgram, UniformBlockSetting} from 'toybox/gl/shader';
 import {Framebuffer} from 'toybox/gl/framebuffer';
 import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, ReadBuffer, SamplerParameter, TextureFormat, TextureTarget, TextureType} from 'toybox/gl/constants';
-import {ShaderRegistry} from 'toybox/gl/shader_registry';
+import {ShaderRegistry, ShaderSource} from 'toybox/gl/shader_registry';
 import {Profiler} from 'toybox/gl/profiler';
 import {Texture, Texture2D, Texture2DDef, TextureCube, TextureCubeDef} from 'toybox/gl/texture';
 import {Buffer, VertexArray, VertexArrayDef, VertexBuffer, VertexBufferDef} from 'toybox/gl/vertex_array';
 import {memoize} from 'toybox/util/memoize';
 import {TypedArray} from 'toybox/util/array';
+
+const COLOR_ATTACHMENTS: number[][] = [
+  [GL.BACK],
+  [GL.COLOR_ATTACHMENT0],
+  [GL.COLOR_ATTACHMENT0, GL.COLOR_ATTACHMENT1],
+  [GL.COLOR_ATTACHMENT0, GL.COLOR_ATTACHMENT1, GL.COLOR_ATTACHMENT2],
+  [GL.COLOR_ATTACHMENT0, GL.COLOR_ATTACHMENT1, GL.COLOR_ATTACHMENT2, GL.COLOR_ATTACHMENT3],
+];
 
 export interface ContextOptions {
   sharedUniformBlocks?: string[];
@@ -71,6 +79,8 @@ export class Context {
   public init: () => void;
 
   public initialized = false;
+
+  private anonymousShaderId = 0;
 
   constructor(public canvas: HTMLCanvasElement, options: ContextOptions) {
     options = options || {};
@@ -192,16 +202,36 @@ export class Context {
   newShaderProgram(vsUri: string, fsUri: string, defines?: ShaderDefines) {
     const gl = this.gl;
     const program = new ShaderProgram(this);
-    const loadPromises = [this.shaderRegistry.load(vsUri),
-                          this.shaderRegistry.load(fsUri)];
-    const promise = Promise.all(loadPromises).then((promiseValues) => {
+    const loadPromises: Promise<ShaderSource>[] = [];
+    for (let uri of [vsUri, fsUri]) {
+      if (!this.shaderRegistry.has(uri)) {
+        loadPromises.push(this.shaderRegistry.load(uri));
+      }
+    }
+
+    let compileAndLink = () => {
       const vs = this.shaderRegistry.compile(GL.VERTEX_SHADER, vsUri, defines);
       const fs = this.shaderRegistry.compile(GL.FRAGMENT_SHADER, fsUri, defines);
       program.setShaders(vs, fs);
       program.link();
-    });
-    this.promises.push(promise);
+    };
+    if (loadPromises.length > 0) {
+      this.promises.push(Promise.all(loadPromises).then(compileAndLink));
+    } else {
+      compileAndLink();
+    }
     return program;
+  }
+
+  // Convenience method for creating an shader from source.
+  // No memoization of the sources is performed.
+  newShaderProgramFromSource(vsSrc: string, fsSrc: string, defines?: ShaderDefines) {
+    let vsUri = `__anonymous_vs_${this.anonymousShaderId}__`;
+    let fsUri = `__anonymous_fs_${this.anonymousShaderId}__`;
+    this.shaderRegistry.register(vsUri, vsSrc);
+    this.shaderRegistry.register(fsUri, fsSrc);
+    this.anonymousShaderId += 1;
+    return this.newShaderProgram(vsUri, fsUri, defines);
   }
 
   newVertexArray(buffers: VertexArrayDef) {
@@ -293,9 +323,11 @@ export class Context {
     }
     gl.bindFramebuffer(GL.FRAMEBUFFER, handle);
     gl.viewport(x, y, w, h);
+
+    gl.drawBuffers(COLOR_ATTACHMENTS[fb == null ? 0 : fb.color.length]);
   }
 
-  draw(vertexArray: VertexArray, type: GLenum = GL.TRIANGLES, count = 0, offset = 0) {
+  draw(vertexArray: VertexArray, type: GLenum = GL.TRIANGLES, offset = 0, count = 0) {
     const gl = this.gl;
     gl.bindVertexArray(vertexArray.handle);
     if (vertexArray.ib) {
@@ -307,9 +339,11 @@ export class Context {
 
   // Forcibly draw arrays even if the vertex array has an index buffer.
   // This is useful for drawing a mesh using POINTs.
-  drawArrays(vertexArray: VertexArray, type: GLenum = GL.TRIANGLES, count = 0, offset = 0) {
+  drawArrays(vertexArray: VertexArray, type: GLenum = GL.TRIANGLES, offset = 0, count = 0) {
     const gl = this.gl;
-    gl.bindVertexArray(vertexArray.handle);
+    if (vertexArray != null) {
+      gl.bindVertexArray(vertexArray.handle);
+    }
     gl.drawArrays(type, offset, count || vertexArray.numVertices);
   }
 
