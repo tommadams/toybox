@@ -367,6 +367,10 @@ export class ShaderProgram {
   uniforms: {[id: string]: Uniform} = {};
   samplers: {[id: string]: Sampler} = {};
 
+  // Set of names passed to setUniform or setUniformBlock that don't exist on
+  // the shader. Used for reporting debug messages.
+  private unknownUniforms = new Set<string>();
+
   constructor(public ctx: Context) {
     this.ctx = ctx;
     this.handle = ctx.gl.createProgram();
@@ -462,11 +466,28 @@ export class ShaderProgram {
   }
 
   setUniformBlock(name: string, uniforms: UniformBlockSetting) {
-    this.blocks[name].set(this.ctx.gl, uniforms);
+    let block = this.blocks[name];
+    if (block == null) {
+      if (!this.unknownUniforms.has(name)) {
+        console.log(`Shader program [${this.vs.uri}, ${this.fs.uri}] has no uniform block ${name}`);
+        this.unknownUniforms.add(name);
+      }
+      return;
+    }
+
+    block.set(this.ctx.gl, uniforms);
   }
 
   setUniform(name: string, ...args: any[]) {
     let uniform = this.uniforms[name];
+    if (uniform == null) {
+      if (!this.unknownUniforms.has(name)) {
+        console.log(`Shader program [${this.vs.uri}, ${this.fs.uri}] has no uniform ${name}`);
+        this.unknownUniforms.add(name);
+      }
+      return;
+    }
+
     if (uniform.valueFn == null) {
       // Matrices only have vector uniform functions.
       uniform.arrayFn.call(this.ctx.gl, uniform.loc, false, arguments[1]);
@@ -480,6 +501,7 @@ export class ShaderProgram {
     }
   }
 
+  // TODO(tom): support texture arrays
   bindTexture(name: string, tex: Texture) {
     const gl = this.ctx.gl;
     gl.activeTexture(GL.TEXTURE0 + this.samplers[name].texunit);
