@@ -549,17 +549,17 @@ export function mul(dst: Type, a: ArgType, b: ArgType) {
   dst[1]  = a01 * b00 + a11 * b01 + a21 * b02 + a31 * b03;
   dst[2]  = a02 * b00 + a12 * b01 + a22 * b02 + a32 * b03;
   dst[3]  = a03 * b00 + a13 * b01 + a23 * b02 + a33 * b03;
-                                                         
+
   dst[4]  = a00 * b10 + a10 * b11 + a20 * b12 + a30 * b13;
   dst[5]  = a01 * b10 + a11 * b11 + a21 * b12 + a31 * b13;
   dst[6]  = a02 * b10 + a12 * b11 + a22 * b12 + a32 * b13;
   dst[7]  = a03 * b10 + a13 * b11 + a23 * b12 + a33 * b13;
-                                                         
+
   dst[8]  = a00 * b20 + a10 * b21 + a20 * b22 + a30 * b23;
   dst[9]  = a01 * b20 + a11 * b21 + a21 * b22 + a31 * b23;
   dst[10] = a02 * b20 + a12 * b21 + a22 * b22 + a32 * b23;
   dst[11] = a03 * b20 + a13 * b21 + a23 * b22 + a33 * b23;
-                                                         
+
   dst[12] = a00 * b30 + a10 * b31 + a20 * b32 + a30 * b33;
   dst[13] = a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33;
   dst[14] = a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33;

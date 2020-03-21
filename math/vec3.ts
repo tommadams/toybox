@@ -112,6 +112,13 @@ export function scale(dst: Type, s: number, a: ArgType) {
   return dst;
 }
 
+export function pow(dst: Type, a: ArgType, p: number) {
+  dst[0] = Math.pow(a[0], p);
+  dst[1] = Math.pow(a[1], p);
+  dst[2] = Math.pow(a[2], p);
+  return dst;
+}
+
 export function dot(a: ArgType, b: ArgType) {
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
@@ -130,6 +137,20 @@ export function normalize(dst: Type, a: ArgType) {
   dst[0] = s * a[0];
   dst[1] = s * a[1];
   dst[2] = s * a[2];
+  return dst;
+}
+
+export function safeNormalize(dst: Type, a: ArgType, defaultVal: ArgType) {
+  const s = 1 / Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+  if (s < 0.0000001) {
+    dst[0] = defaultVal[0];
+    dst[1] = defaultVal[1];
+    dst[2] = defaultVal[2];
+  } else {
+    dst[0] = s * a[0];
+    dst[1] = s * a[1];
+    dst[2] = s * a[2];
+  }
   return dst;
 }
 
