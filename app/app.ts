@@ -1,6 +1,5 @@
 import * as input from 'toybox/app/input'
 import {Context, ContextOptions} from 'toybox/gl/context'
-import {ShaderEditor} from 'toybox/app/shader_editor'
 
 export abstract class App {
   private updateRequested = false;
@@ -38,40 +37,6 @@ export abstract class App {
 
     this.ctx.onInit(() => {
       this.onInit();
-    });
-
-    // TODO(tom): add canvas toggle programmatically.
-    document.getElementById('canvas-toggle').addEventListener('click', (e) => {
-      let panel = document.getElementById('main-panel');
-      let elem = e.target as HTMLElement;
-      if (elem.innerHTML == '-') {
-        panel.style.left = null;
-        panel.style.width = null;
-        panel.style.height = null;
-        document.getElementById('left-panel').style.display = null;
-        document.getElementById('bottom-panel').style.display = null;
-        elem.innerText = '+'; 
-      } else {
-        panel.style.left = '0';
-        panel.style.width = '100%';
-        panel.style.height = '100%';
-        document.getElementById('left-panel').style.display = 'none';
-        document.getElementById('bottom-panel').style.display = 'none';
-        elem.innerText = '-'; 
-        if (!this.updating) {
-          this.render();
-        }
-      }
-    });
-
-    const shaderEditor = new ShaderEditor(
-        document.getElementById('left-panel'), this.ctx);
-
-    // TODO(tom): move this into ShaderEditor
-    shaderEditor.onCompile(() => {
-      if (!this.updating) {
-        this.render();
-      }
     });
 
     window.addEventListener('resize', () => {
