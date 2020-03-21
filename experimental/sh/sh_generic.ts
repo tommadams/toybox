@@ -35,7 +35,7 @@ ctx.onInit(() => {
       ofs[0] = m * spacing;
 
       let col = vec3.newFromValues(1, 1, 1);
-      let sphere = icosphere.getMesh(5).clone();
+      let sphere = icosphere.newMesh(5);
       let colors: vec3.Type[] = [];
       for (let p of sphere.positions) {
         let theta = Math.acos(p[1]);
