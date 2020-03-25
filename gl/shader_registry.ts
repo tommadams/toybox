@@ -1,6 +1,6 @@
 import * as http from 'toybox/util/http'
 import {Context} from 'toybox/gl/context'
-import {Shader, ShaderDefines, ShaderProgram, SrcMapEntry} from 'toybox/gl/shader'
+import {Shader, ShaderDefines, ShaderProgram, SrcMapEntry, TexUnits} from 'toybox/gl/shader'
 import {ShaderType} from 'toybox/gl/constants'
 import {memoizeAsync} from 'toybox/util/memoize'
 
@@ -130,7 +130,11 @@ export class ShaderRegistry {
     }
     for (let program of dirtyPrograms) {
       console.log(`relinking (${program.vs.uri}, ${program.fs.uri})`);
-      program.link();
+      let texUnits: TexUnits = {};
+      for (let key in program.samplers) {
+        texUnits[key] = program.samplers[key].texUnit;
+      }
+      program.link(texUnits);
     }
   }
 

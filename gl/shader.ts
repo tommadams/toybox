@@ -19,11 +19,17 @@ export interface SrcMapEntry {
 }
 
 export interface ShaderDefines {[id: string]: number | string}
+export interface TexUnits {[id: string]: number}
+
+export interface ShaderOptions {
+  defines?: ShaderDefines;
+  texUnits?: TexUnits;
+}
 
 export interface Sampler {
   type: number;
   loc: WebGLUniformLocation;
-  texunit: number;
+  texUnit: number;
 }
 
 export interface UniformBlockSetting { [index: string]: number | NumericArray; }
@@ -386,7 +392,13 @@ export class ShaderProgram {
     gl.attachShader(this.handle, fs.handle);
   }
 
-  link() {
+  link(texUnits?: TexUnits) {
+    texUnits = texUnits || {};
+    let reservedTexUnits = new Set<number>();
+    for (let name in texUnits) {
+      reservedTexUnits.add(texUnits[name]);
+    }
+
     const ctx = this.ctx;
     const gl = ctx.gl;
     gl.linkProgram(this.handle);
@@ -432,7 +444,10 @@ export class ShaderProgram {
     }
 
     // Initialize texture samplers.
-    let texunit = 0;
+    let nextTexUnit = 0;
+    while (reservedTexUnits.has(nextTexUnit)) {
+      nextTexUnit += 1;
+    }
     let numUniforms = gl.getProgramParameter(this.handle, GL.ACTIVE_UNIFORMS);
     for (let i = 0; i < numUniforms; ++i) {
       let glUniform = gl.getActiveUniform(this.handle, i);
@@ -449,7 +464,14 @@ export class ShaderProgram {
           type == GL.UNSIGNED_INT_SAMPLER_2D ||
           type == GL.UNSIGNED_INT_SAMPLER_3D ||
           type == GL.UNSIGNED_INT_SAMPLER_CUBE) {
-        this.samplers[name] = {type: type, loc: loc, texunit: texunit++};
+        let texUnit = texUnits[name];
+        if (texUnit === undefined) {
+          texUnit = nextTexUnit;
+          do {
+            nextTexUnit += 1;
+          } while (reservedTexUnits.has(nextTexUnit));
+        }
+        this.samplers[name] = {type: type, loc: loc, texUnit: texUnit};
       } else if (name.indexOf(".") == -1) {
         // Uniform, not part of a block.
         if (name.endsWith('[0]')) {
@@ -461,7 +483,7 @@ export class ShaderProgram {
     gl.useProgram(this.handle);
     for (let key in this.samplers) {
       const sampler = this.samplers[key];
-      gl.uniform1i(sampler.loc, sampler.texunit);
+      gl.uniform1i(sampler.loc, sampler.texUnit);
     }
   }
 
@@ -504,7 +526,15 @@ export class ShaderProgram {
   // TODO(tom): support texture arrays
   bindTexture(name: string, tex: Texture) {
     const gl = this.ctx.gl;
-    gl.activeTexture(GL.TEXTURE0 + this.samplers[name].texunit);
+    let sampler = this.samplers[name];
+    if (sampler == null) {
+      if (!this.unknownUniforms.has(name)) {
+        console.log(`Shader program [${this.vs.uri}, ${this.fs.uri}] has no sampler ${name}`);
+        this.unknownUniforms.add(name);
+      }
+      return;
+    }
+    gl.activeTexture(GL.TEXTURE0 + sampler.texUnit);
     gl.bindTexture(tex.target, tex.handle)
   }
 }

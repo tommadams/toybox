@@ -147,7 +147,7 @@ export class DynamicDraw {
     for (let mode in BlitMode) {
       if (typeof BlitMode[mode] === 'number') {
         this.shaders[mode] = ctx.newShaderProgram(
-            'draw.blit.vs', 'draw.blit.fs', {MODE: BlitMode[mode]});
+            'draw.blit.vs', 'draw.blit.fs', {defines: {MODE: BlitMode[mode]}});
       }
     }
 

@@ -1,4 +1,4 @@
-import {Block, Shader, ShaderDefines, ShaderProgram, UniformBlockSetting} from 'toybox/gl/shader';
+import {Block, Shader, ShaderOptions, ShaderProgram, UniformBlockSetting} from 'toybox/gl/shader';
 import {Framebuffer} from 'toybox/gl/framebuffer';
 import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, ReadBuffer, SamplerParameter, TextureFormat, TextureTarget, TextureType} from 'toybox/gl/constants';
 import {ShaderRegistry, ShaderSource} from 'toybox/gl/shader_registry';
@@ -199,7 +199,7 @@ export class Context {
     }
   }
 
-  newShaderProgram(vsUri: string, fsUri: string, defines?: ShaderDefines) {
+  newShaderProgram(vsUri: string, fsUri: string, options?: ShaderOptions) {
     const gl = this.gl;
     const program = new ShaderProgram(this);
     const loadPromises: Promise<ShaderSource>[] = [];
@@ -209,11 +209,14 @@ export class Context {
       }
     }
 
+    let defines = options ? options.defines || null : null;
+    let texUnits = options ? options.texUnits || null : null;
+
     let compileAndLink = () => {
       const vs = this.shaderRegistry.compile(GL.VERTEX_SHADER, vsUri, defines);
       const fs = this.shaderRegistry.compile(GL.FRAGMENT_SHADER, fsUri, defines);
       program.setShaders(vs, fs);
-      program.link();
+      program.link(texUnits);
     };
     if (loadPromises.length > 0) {
       this.promises.push(Promise.all(loadPromises).then(compileAndLink));
@@ -225,13 +228,13 @@ export class Context {
 
   // Convenience method for creating an shader from source.
   // No memoization of the sources is performed.
-  newShaderProgramFromSource(vsSrc: string, fsSrc: string, defines?: ShaderDefines) {
+  newShaderProgramFromSource(vsSrc: string, fsSrc: string, options?: ShaderOptions) {
     let vsUri = `__anonymous_vs_${this.anonymousShaderId}__`;
     let fsUri = `__anonymous_fs_${this.anonymousShaderId}__`;
     this.shaderRegistry.register(vsUri, vsSrc);
     this.shaderRegistry.register(fsUri, fsSrc);
     this.anonymousShaderId += 1;
-    return this.newShaderProgram(vsUri, fsUri, defines);
+    return this.newShaderProgram(vsUri, fsUri, options);
   }
 
   newVertexArray(buffers: VertexArrayDef) {
