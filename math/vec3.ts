@@ -244,3 +244,13 @@ export function reflect(dst: Type, i: Type, n: Type) {
   addScaled(dst, i, n, -2 * dot(n, i));
   return dst;
 }
+
+export function toString(v: ArgType, precision=3, sep=' ') {
+  let a = v[0].toFixed(precision);
+  let b = v[1].toFixed(precision);
+  let c = v[2].toFixed(precision);
+  if (a[0] != '-') { a = ' ' + a; }
+  if (b[0] != '-') { b = ' ' + b; }
+  if (c[0] != '-') { c = ' ' + c; }
+  return `[${a}${sep}${b}${sep}${c}]`;
+}

@@ -137,3 +137,11 @@ export function max(dst: Type, a: ArgType, b: ArgType) {
   dst[1] = Math.max(a[1], b[1]);
   return dst;
 }
+
+export function toString(v: ArgType, precision=3, sep=' ') {
+  let a = v[0].toFixed(precision);
+  let b = v[1].toFixed(precision);
+  if (a[0] != '-') { a = ' ' + a; }
+  if (b[0] != '-') { b = ' ' + b; }
+  return `[${a}${sep}${b}]`;
+}

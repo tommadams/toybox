@@ -634,8 +634,7 @@ export function abs(dst: Type, m: ArgType) {
   return dst;
 }
 
-
-export function toString(m: Type, precision = 3) {
+export function toString(m: Type, precision=3, sep=' ') {
   let str = '';
   for (let i = 0; i < 16;) {
     let a = m[i++].toFixed(precision);
@@ -646,7 +645,8 @@ export function toString(m: Type, precision = 3) {
     if (b[0] != '-') { b = ' ' + b; }
     if (c[0] != '-') { c = ' ' + c; }
     if (d[0] != '-') { d = ' ' + d; }
-    str += a + ' ' + b + ' ' + c + ' ' + d + '\n';
+    str += `[${a}${sep}${b}${sep}${c}${sep}${d}]
+`
   }
   return str;
 }

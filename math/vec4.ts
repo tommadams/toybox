@@ -40,3 +40,15 @@ export function scale(dst: Type, a: ArgType, s: number) {
   dst[3] = a[3] * s;
   return dst;
 }
+
+export function toString(v: ArgType, precision=3, sep=' ') {
+  let a = v[0].toFixed(precision);
+  let b = v[1].toFixed(precision);
+  let c = v[2].toFixed(precision);
+  let d = v[3].toFixed(precision);
+  if (a[0] != '-') { a = ' ' + a; }
+  if (b[0] != '-') { b = ' ' + b; }
+  if (c[0] != '-') { c = ' ' + c; }
+  if (d[0] != '-') { d = ' ' + d; }
+  return `[${a}${sep}${b}${sep}${c}${sep}${d}]`;
+}
