@@ -1,11 +1,8 @@
-import {Context} from 'toybox/gl/context'
-import {GL, DataType} from 'toybox/gl/constants'
-import {NumericArray, TypedArray} from 'toybox/util/array'
-import {Texture} from 'toybox/gl/texture'
+import {NumericArray, TypedArray} from '../types/array'
 
-interface ErrorConstructor {
-  captureStackTrace(thisArg: any, func: any): void;
-}
+import {Context} from './context'
+import {GL, DataType} from './constants'
+import {Texture} from './texture'
 
 export interface ShaderErrorMsg {
   uri: string;
@@ -41,7 +38,7 @@ function uniformValueIsArray(value: number | NumericArray): value is NumericArra
 export class CompileError extends Error {
   errors = new Array<ShaderErrorMsg>();
 
-  constructor(msg: string, src: string, srcMap: SrcMapEntry[]) {
+  constructor(msg: string, srcMap: SrcMapEntry[]) {
     super(msg);
     console.log(`Raw GL error:\n${msg}`);
 
@@ -54,7 +51,6 @@ export class CompileError extends Error {
 
     // Group errLines by line number.
     let groupMap = new Map<number, {errorLine: number, errors: string[]}>();
-    let prevGroup = null;
     let errorLine = -1;
     errLines.forEach((line) => {
       // Sometimes nvidia drivers return a string containing the null terminator :/
@@ -196,8 +192,6 @@ export class Block {
       indicesArray[i] = indices[i];
     }
     const offsets = gl.getActiveUniforms(programHandle, indicesArray, GL.UNIFORM_OFFSET) as number[];
-
-    const uniformNameRegex = RegExp(`${this.name}\.(.*)(.0.)?`);
 
     this.buffer = new ArrayBuffer(blockDataSize);
     this.handle = gl.createBuffer();
@@ -360,7 +354,7 @@ export class Shader {
     gl.shaderSource(this.handle, src);
     gl.compileShader(this.handle);
     if (!gl.getShaderParameter(this.handle, GL.COMPILE_STATUS)) {
-      throw new CompileError(gl.getShaderInfoLog(this.handle), src, srcMap);
+      throw new CompileError(gl.getShaderInfoLog(this.handle), srcMap);
     }
   }
 }
@@ -500,7 +494,7 @@ export class ShaderProgram {
     block.set(this.ctx.gl, uniforms);
   }
 
-  setUniform(name: string, ...args: any[]) {
+  setUniform(name: string, ..._args: any[]) {
     let uniform = this.uniforms[name];
     if (uniform == null) {
       if (!this.unknownUniforms.has(name)) {

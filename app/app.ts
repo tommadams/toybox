@@ -1,9 +1,9 @@
-import * as input from 'toybox/app/input'
-import {Context, ContextOptions} from 'toybox/gl/context'
+import * as input from './input'
+import {Context, ContextOptions} from '../gl/context'
 
 export abstract class App {
   private updateRequested = false;
-  updating: boolean;
+  updating = false;
   ctx: Context;
 
   // constructor(public parentElem: HTMLElement | string, public updating=true) {

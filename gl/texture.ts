@@ -1,5 +1,5 @@
-import {Context} from 'toybox/gl/context'
-import {DataType, GL, TextureCompareMode, TextureInternalFormat, TextureFormat, TextureMinFilter, TextureTarget, TextureType, TextureWrap} from 'toybox/gl/constants'
+import {Context} from './context'
+import {GL, TextureCompareMode, TextureInternalFormat, TextureFormat, TextureMinFilter, TextureTarget, TextureType, TextureWrap} from './constants'
 
 export function inferType(internalFormat: TextureInternalFormat): TextureType {
   switch (internalFormat) {

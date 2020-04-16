@@ -1,7 +1,8 @@
-import * as qt from 'toybox/math/quat'
-import * as v3 from 'toybox/math/vec3'
-import * as v4 from 'toybox/math/vec4'
-import {NumericArray} from 'toybox/util/array'
+import {NumericArray} from '../types/array'
+
+import * as qt from './quat'
+import * as v3 from './vec3'
+import * as v4 from './vec4'
 
 export type Type = Float32Array;
 export type ArgType = NumericArray;

@@ -1,7 +1,7 @@
-import {Context} from 'toybox/gl/context';
-import {ShaderErrorMsg} from 'toybox/gl/shader';
+import {Context} from '../gl/context';
+import {ShaderErrorMsg} from '../gl/shader';
 
-import * as input from 'toybox/app/input';
+import * as input from './input';
 
 declare let CodeMirror: any;
 
@@ -117,7 +117,7 @@ export class ShaderEditor {
       }
     });
 
-    selectElem.addEventListener('change', (e) => {
+    selectElem.addEventListener('change', () => {
       let uri = selectElem.value;
       this.edit(uri, ctx.shaderRegistry.getSrc(uri));
     });

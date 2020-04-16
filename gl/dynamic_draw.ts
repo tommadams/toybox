@@ -1,12 +1,12 @@
-import * as mat4 from 'toybox/math/mat4'
-import * as vec3 from 'toybox/math/vec3'
-import * as vec4 from 'toybox/math/vec4'
-import {Context} from 'toybox/gl/context'
-import {GL} from 'toybox/gl/constants'
-import {ShaderProgram} from 'toybox/gl/shader'
-import {Texture} from 'toybox/gl/texture'
-import {TypedArrayList} from 'toybox/util/array'
-import {VertexArray} from 'toybox/gl/vertex_array'
+import * as mat4 from '../math/mat4'
+import * as vec3 from '../math/vec3'
+import * as vec4 from '../math/vec4'
+import {Context} from './context'
+import {GL} from './constants'
+import {ShaderProgram} from './shader'
+import {Texture} from './texture'
+import {TypedArrayList} from '../types/array'
+import {VertexArray} from './vertex_array'
 
 
 const _tmp0 = vec3.newZero();
@@ -388,7 +388,6 @@ export class DynamicDraw {
       return;
     }
 
-    const gl = this.ctx.gl;
     this.ctx.useProgram(this.shaders.flat);
     this.shaders.flat.setUniformBlock('Camera', {viewProj: viewProj});
     this.shaders.flat.setUniform('offset', offset);

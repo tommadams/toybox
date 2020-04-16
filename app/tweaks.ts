@@ -218,7 +218,7 @@ export class RangeTweak extends Tweak {
       this.invokeListeners(this.obj[this.prop], oldVal);
     };
 
-    this.onMouseUp = (e) => {
+    this.onMouseUp = () => {
       this.rangeElem.addEventListener('mousedown', this.onMouseDown);
       window.removeEventListener('mousemove', this.onMouseMove);
       window.removeEventListener('mouseup', this.onMouseUp);

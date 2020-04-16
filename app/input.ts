@@ -1,6 +1,6 @@
 const keysDown = new Array<boolean>(256);
 const prevKeysDown = new Array<boolean>(256);
-const events: [string, EventListener][] = [
+const events: [string, any][] = [
   ['keydown', onKeyDown],
   ['keyup', onKeyUp],
   ['mousemove', onMouseMove],
@@ -146,7 +146,7 @@ function onMouseDown(e: MouseEvent) {
   mouseDown = true;
 }
 
-function onMouseUp(e: MouseEvent) {
+function onMouseUp() {
   mouseDownElem = null;
   mouseDown = false;
 }

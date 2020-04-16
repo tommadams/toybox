@@ -1,7 +1,6 @@
 // RGB third order spherical harmonics.
 
-import * as vec3 from 'toybox/math/vec3';
-import {NumericArray} from 'toybox/util/array'
+import * as vec3 from './vec3';
 
 export type Type = Float32Array;
 

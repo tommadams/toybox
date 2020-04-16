@@ -1,4 +1,4 @@
-import {NumericArray} from 'util/array';
+import {NumericArray} from '../types/array';
 
 export function assertTrue(x: boolean) {
   if (x !== true) {

@@ -1,9 +1,7 @@
-import {NumericArray} from 'toybox/util/array'
+import {NumericArray} from '../types/array'
 
 export type Type = Float32Array;
 export type ArgType = NumericArray;
-
-const _tmp = new Float32Array(2);
 
 export function newZero() {
   return new Float32Array(2);

@@ -1,4 +1,4 @@
-import * as vec3 from 'toybox/math/vec3';
+import * as vec3 from '../math/vec3';
 
 export type IndexArray = Uint8Array | Uint16Array | Uint32Array;
 
@@ -106,7 +106,7 @@ class Vec3Set {
   }
 }
 
-export function subdivide(positions: vec3.Type[], faces: number[], edges: number[]) {
+export function subdivide(positions: vec3.Type[], faces: number[]) {
   let newPositions = new Vec3Set();
   let newFaces: number[] = [];
   let newEdges = new EdgeSet();

@@ -1,7 +1,5 @@
-import {EPSILON} from 'toybox/math/constants'
-import * as mat4 from 'toybox/math/mat4'
-import * as vec2 from 'toybox/math/vec2'
-import * as vec3 from 'toybox/math/vec3'
+import {EPSILON} from './constants'
+import * as vec3 from './vec3'
 
 /**
  * Details about an intersection.
@@ -25,7 +23,6 @@ export class Intersection3d {
 
 // Temporaries for raySphere.
 let rsM = vec3.newZero();
-let rs = vec3.newZero();
 
 // Temporaries for sweptSphereQuadrilateral.
 let ssqAB = vec3.newZero();
@@ -51,7 +48,6 @@ let sseXP = vec3.newZero();
 let edgeIntersection = new Intersection3d();
 
 // Temporaries for pointInTriangle.
-let pitN = vec3.newZero();
 let pitA = vec3.newZero();
 let pitB = vec3.newZero();
 let pitC = vec3.newZero();

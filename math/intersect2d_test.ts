@@ -1,9 +1,9 @@
-import * as intersect2d from 'toybox/math/intersect2d';
-import * as vec2 from 'toybox/math/vec2';
+import {assertTrue, assertEqual, assertRoughlyEqual, assertElementsRoughlyEqual, runTests} from '../util/test_util';
+import {NumericArray} from '../types/array';
 
-import {assertTrue, assertEqual, assertRoughlyEqual, assertElementsRoughlyEqual, runTests} from 'toybox/util/test_util';
+import * as intersect2d from './intersect2d';
+import * as vec2 from './vec2';
 
-import {NumericArray} from 'util/array';
 
 
 let E = 0.000001;

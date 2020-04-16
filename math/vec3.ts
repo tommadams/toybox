@@ -1,4 +1,4 @@
-import {NumericArray} from 'toybox/util/array'
+import {NumericArray} from '../types/array'
 
 export type Type = Float32Array;
 export type ArgType = NumericArray;

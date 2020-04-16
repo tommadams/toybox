@@ -1,5 +1,5 @@
-import {GL} from 'toybox/gl/constants';
-import {Context} from 'toybox/gl/context';
+import {GL} from './constants';
+import {Context} from './context';
 
 const EXT_NAME = 'EXT_disjoint_timer_query_webgl2';
 const FILTER_SIZE = 3;

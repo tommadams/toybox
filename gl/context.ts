@@ -1,12 +1,11 @@
-import {Block, Shader, ShaderOptions, ShaderProgram, UniformBlockSetting} from 'toybox/gl/shader';
-import {Framebuffer} from 'toybox/gl/framebuffer';
-import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, ReadBuffer, SamplerParameter, TextureFormat, TextureTarget, TextureType} from 'toybox/gl/constants';
-import {ShaderRegistry, ShaderSource} from 'toybox/gl/shader_registry';
-import {Profiler} from 'toybox/gl/profiler';
-import {Texture, Texture2D, Texture2DDef, TextureCube, TextureCubeDef} from 'toybox/gl/texture';
-import {Buffer, VertexArray, VertexArrayDef, VertexBuffer, VertexBufferDef} from 'toybox/gl/vertex_array';
-import {memoize} from 'toybox/util/memoize';
-import {TypedArray} from 'toybox/util/array';
+import {Block, ShaderOptions, ShaderProgram, UniformBlockSetting} from './shader';
+import {Framebuffer} from './framebuffer';
+import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, ReadBuffer, SamplerParameter, TextureFormat, TextureTarget, TextureType} from './constants';
+import {ShaderRegistry, ShaderSource} from './shader_registry';
+import {Profiler} from './profiler';
+import {Texture, Texture2D, Texture2DDef, TextureCube, TextureCubeDef} from './texture';
+import {Buffer, VertexArray, VertexArrayDef, VertexBuffer, VertexBufferDef} from './vertex_array';
+import {TypedArray} from '../types/array';
 
 const COLOR_ATTACHMENTS: number[][] = [
   [GL.BACK],
@@ -200,7 +199,6 @@ export class Context {
   }
 
   newShaderProgram(vsUri: string, fsUri: string, options?: ShaderOptions) {
-    const gl = this.gl;
     const program = new ShaderProgram(this);
     const loadPromises: Promise<ShaderSource>[] = [];
     for (let uri of [vsUri, fsUri]) {
@@ -297,12 +295,12 @@ export class Context {
   }
 
   // Calls setUniform on the currently bound shader program.
-  setUniform(...args: any[]) {
+  setUniform(..._args: any[]) {
     ShaderProgram.prototype.setUniform.apply(this.boundShader, arguments);
   }
 
   // Calls setUniformBlock on the currently bound shader program.
-  setUniformBlock(...args: any[]) {
+  setUniformBlock(..._args: any[]) {
     ShaderProgram.prototype.setUniformBlock.apply(this.boundShader, arguments);
   }
 

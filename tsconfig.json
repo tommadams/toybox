@@ -1,27 +1,40 @@
 {
-  "compilerOptions": {
-    "outDir": "./built",
-    "target": "es2016",
-    "sourceMap": true,
-    "module": "amd",
+    "compilerOptions": {
+        "target": "es2016",
+        "sourceMap": true,
+        "allowJs": false,
+        "removeComments": false,
+        "newLine": "LF",
 
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
+        "strict": true,
+        "strictBindCallApply": false,
+        "strictNullChecks": false,
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
 
-    "lib": [
-      "es2017",
-      "es2017.sharedmemory",
-      "DOM",
-      "DOM.Iterable",
-      "ScriptHost"
+        "declaration": true,
+        "baseUrl": "./",
+        "outDir": "./built"
+    },
+    "include": [
+      "index.ts",
+      "app",
+      "color",
+      "geom",
+      "gl",
+      "math",
+      "types",
+      "util"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/dist/**",
+        "**/lib/**",
+        "**/test/**",
+        "**/scripts/**",
+        "bundles/**/*.d.ts",
+        "rollup.config.js"
     ]
-  },
-  "include": [
-    "./**/*"
-  ],
-  "exclude": [
-    "./built"
-  ]
 }
-

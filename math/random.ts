@@ -1,4 +1,4 @@
-import * as u64 from 'toybox/math/uint64'
+import * as u64 from '../types/uint64'
 
 const _mul = u64.newFromParts(0x5851f42d, 0x4c957f2d);
 const _tmp = u64.newZero();

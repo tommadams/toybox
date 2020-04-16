@@ -1,4 +1,4 @@
-import {shuffle} from 'toybox/util/array'
+import {shuffle} from '../types/array'
 
 function lerp(t: number, a: number, b: number) { return a + t * (b - a); }
 

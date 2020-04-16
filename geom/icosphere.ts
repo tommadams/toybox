@@ -1,8 +1,7 @@
-import * as vec2 from 'toybox/math/vec2';
-import * as vec3 from 'toybox/math/vec3';
+import * as vec3 from '../math/vec3';
 
-import * as icosahedron from 'toybox/geom/icosahedron';
-import {Mesh, FlatMesh, flatten, subdivide} from 'toybox/geom/mesh';
+import * as icosahedron from './icosahedron';
+import {Mesh, FlatMesh, flatten, subdivide} from './mesh';
 
 let cache: Mesh[] = [icosahedron.mesh];
 let flatCache: FlatMesh[] = [icosahedron.flatMesh];
@@ -14,7 +13,7 @@ function cacheMesh(numSubdivisions: number) {
   let mesh = cache[numSubdivisions];
   if (mesh === undefined) {
     let base = cacheMesh(numSubdivisions - 1);
-    mesh = subdivide(base.positions, base.faceIndices, base.edgeIndices);
+    mesh = subdivide(base.positions, base.faceIndices);
     // Normalize the subdivided vertex positions, skiping over the vertices
     // copied from the base mesh.
     for (let i = base.positions.length; i < mesh.positions.length; ++i) {

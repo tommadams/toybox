@@ -1,6 +1,6 @@
-import {Context} from 'toybox/gl/context'
-import {GL, TextureTarget} from 'toybox/gl/constants'
-import {Texture, Texture2D, TextureCube} from 'toybox/gl/texture'
+import {Context} from './context'
+import {GL, TextureTarget} from './constants'
+import {Texture, Texture2D} from './texture'
 
 export class Framebuffer {
   handle: WebGLFramebuffer;

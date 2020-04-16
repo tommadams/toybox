@@ -1,6 +1,6 @@
-import * as vec3 from 'toybox/math/vec3';
+import * as vec3 from '../math/vec3';
 
-import {Mesh, FlatMesh, flatten} from 'toybox/geom/mesh';
+import {Mesh, flatten} from './mesh';
 
 export function newMesh(center: vec3.ArgType, normal: vec3.ArgType, size: number,
                         subdivisions: number) {

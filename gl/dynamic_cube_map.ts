@@ -1,12 +1,12 @@
-import * as mat4 from 'toybox/math/mat4';
-import * as vec3 from 'toybox/math/vec3';
+import * as mat4 from '../math/mat4';
+import * as vec3 from '../math/vec3';
 
-import {GL} from 'toybox/gl/constants';
-import {Context} from 'toybox/gl/context';
-import {TextureInternalFormat, TextureMinFilter} from 'toybox/gl/constants';
-import {Framebuffer} from 'toybox/gl/framebuffer';
-import {Texture2D, TextureCube} from 'toybox/gl/texture';
-import {TypedArray, TypedArrayConstructor} from 'toybox/util/array';
+import {GL} from './constants';
+import {Context} from './context';
+import {TextureInternalFormat, TextureMinFilter} from './constants';
+import {Framebuffer} from './framebuffer';
+import {Texture2D, TextureCube} from './texture';
+import {TypedArray, TypedArrayConstructor} from '../types/array';
 
 let tmp = vec3.newZero();
 
@@ -123,7 +123,7 @@ export class DynamicCubeMap {
           default:
             throw new Error(`unsupported type ${target.type}`);
         }
-        for (let [i, face] of this.faces.entries()) {
+        for (let face of this.faces) {
           face.pixels.push(new ctor(this.size * this.size * numChannels));
         }
       }

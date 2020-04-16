@@ -1,5 +1,5 @@
-import * as vec2 from 'toybox/math/vec2';
-import {EPSILON} from 'toybox/math/constants';
+import {EPSILON} from './constants';
+import * as vec2 from './vec2';
 
 /**
  * Details about an intersection.

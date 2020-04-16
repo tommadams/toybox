@@ -1,8 +1,9 @@
-import * as http from 'toybox/util/http'
-import {Context} from 'toybox/gl/context'
-import {Shader, ShaderDefines, ShaderProgram, SrcMapEntry, TexUnits} from 'toybox/gl/shader'
-import {ShaderType} from 'toybox/gl/constants'
-import {memoizeAsync} from 'toybox/util/memoize'
+import {memoizeAsync} from '../util/memoize'
+import * as http from '../util/http'
+
+import {ShaderType} from './constants'
+import {Context} from './context'
+import {Shader, ShaderDefines, ShaderProgram, SrcMapEntry, TexUnits} from './shader'
 
 // Default preamble for WebGL2 shaders.
 const defaultPreamble = `#version 300 es

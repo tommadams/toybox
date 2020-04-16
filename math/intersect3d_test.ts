@@ -1,10 +1,8 @@
-import * as intersect3d from 'toybox/math/intersect3d';
-import * as mat4 from 'toybox/math/mat4';
-import * as vec3 from 'toybox/math/vec3';
+import {NumericArray} from '../types/array';
+import {assertTrue, assertEqual, assertNotNull, assertRoughlyEqual, assertElementsRoughlyEqual, runTests} from '../util/test_util';
 
-import {assertTrue, assertEqual, assertNotNull, assertRoughlyEqual, assertElementsRoughlyEqual, runTests} from 'toybox/util/test_util';
-
-import {NumericArray} from 'toybox/util/array';
+import * as intersect3d from './intersect3d';
+import * as vec3 from './vec3';
 
 
 let E = 0.000001;

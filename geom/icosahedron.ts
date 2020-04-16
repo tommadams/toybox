@@ -1,6 +1,6 @@
-import * as vec3 from 'toybox/math/vec3';
+import * as vec3 from '../math/vec3';
 
-import {Mesh, flatten} from 'toybox/geom/mesh';
+import {Mesh, flatten} from './mesh';
 
 const positions: vec3.Type[] = (() => {
   const theta = 0.4 * Math.PI;

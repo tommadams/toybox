@@ -1,7 +1,6 @@
-import * as mat4 from 'toybox/math/mat4';
-import * as vec3 from 'toybox/math/vec3';
-import * as vec4 from 'toybox/math/vec4';
-import {NumericArray} from 'toybox/util/array'
+import * as mat4 from './mat4';
+import * as vec3 from './vec3';
+import * as vec4 from './vec4';
 
 export type Type = Float32Array[];
 

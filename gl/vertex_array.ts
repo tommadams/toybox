@@ -1,9 +1,10 @@
-import {Context} from 'toybox/gl/context'
-import {NumericArray, TypedArray, TypedArrayConstructor, TypedArrayList} from 'toybox/util/array'
-import {GL, BufferUsage, DataType} from 'toybox/gl/constants'
+import {NumericArray, TypedArray, TypedArrayConstructor, TypedArrayList} from '../types/array'
+
+import {Context} from './context'
+import {GL, BufferUsage, DataType} from './constants'
 
 export interface StreamDef {
-  // Number of elements 
+  // Number of elements.
   size: number;
 
   // If specified, the vertex attribute name in the shader to bind to.
