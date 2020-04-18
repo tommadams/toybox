@@ -1,5 +1,5 @@
-import * as mat4 from '../math/mat4';
-import * as vec3 from '../math/vec3';
+import {mat4} from '../math/mat4';
+import {vec3} from '../math/vec3';
 
 import {GL} from './constants';
 import {Context} from './context';
@@ -9,35 +9,6 @@ import {Texture2D, TextureCube} from './texture';
 import {TypedArray, TypedArrayConstructor} from '../types/array';
 
 let tmp = vec3.newZero();
-
-export const FORWARD = [
-  vec3.newFromValues( 1,  0,  0),  // +X
-  vec3.newFromValues(-1,  0,  0),  // -X
-  vec3.newFromValues( 0,  1,  0),  // +Y
-  vec3.newFromValues( 0, -1,  0),  // -Y
-  vec3.newFromValues( 0,  0,  1),  // +Z
-  vec3.newFromValues( 0,  0, -1),  // -Z
-];
-
-export const UP = [
-  vec3.newFromValues( 0, -1,  0),  // +X
-  vec3.newFromValues( 0, -1,  0),  // -X
-  vec3.newFromValues( 0,  0,  1),  // +Y
-  vec3.newFromValues( 0,  0, -1),  // -Y
-  vec3.newFromValues( 0, -1,  0),  // +Z
-  vec3.newFromValues( 0, -1,  0),  // -Z
-];
-
-export const RIGHT = [
-  vec3.newFromValues( 0,  0, -1),  // +X
-  vec3.newFromValues( 0,  0,  1),  // -X
-  vec3.newFromValues( 1,  0,  0),  // +Y
-  vec3.newFromValues( 1,  0,  0),  // -Y
-  vec3.newFromValues( 1,  0,  0),  // +Z
-  vec3.newFromValues(-1,  0,  0),  // -Z
-];
-
-export const NAME = ['+X', '-X', '+Y', '-Y', '+Z', '-Z'];
 
 export class DynamicCubeMap {
   // Projection matrix: shared between all faces.
@@ -77,8 +48,8 @@ export class DynamicCubeMap {
     this.proj = mat4.newPerspective(0.5 * Math.PI, 1, near, far);
     for (let i = 0; i < 6; ++i) {
       let fb = ctx.newFramebuffer(this.color, this.depth, GL.TEXTURE_CUBE_MAP_POSITIVE_X + i);
-      let view = mat4.newLookAt(eyePos, FORWARD[i], UP[i]);
-      this.faces.push(new DynamicCubeMap.Face(NAME[i], fb, view, this.proj));
+      let view = mat4.newLookAt(eyePos, DynamicCubeMap.FORWARD[i], DynamicCubeMap.UP[i]);
+      this.faces.push(new DynamicCubeMap.Face(fb, view, this.proj));
     }
 
     if (this.readPixels) {
@@ -133,14 +104,41 @@ export class DynamicCubeMap {
   setOrigin(origin: vec3.ArgType) {
     for (let i = 0; i < 6; ++i) {
       let face = this.faces[i];
-      let target = vec3.add(tmp, origin, FORWARD[i]);
-      mat4.setLookAt(face.view, origin, target, UP[i]);
+      let target = vec3.add(tmp, origin, DynamicCubeMap.FORWARD[i]);
+      mat4.setLookAt(face.view, origin, target, DynamicCubeMap.UP[i]);
       mat4.mul(face.viewProj, this.proj, face.view);
     }
   }
 }
 
 export namespace DynamicCubeMap {
+  export const FORWARD = [
+    vec3.newFromValues( 1,  0,  0),  // +X
+    vec3.newFromValues(-1,  0,  0),  // -X
+    vec3.newFromValues( 0,  1,  0),  // +Y
+    vec3.newFromValues( 0, -1,  0),  // -Y
+    vec3.newFromValues( 0,  0,  1),  // +Z
+    vec3.newFromValues( 0,  0, -1),  // -Z
+  ];
+
+  export const UP = [
+    vec3.newFromValues( 0, -1,  0),  // +X
+    vec3.newFromValues( 0, -1,  0),  // -X
+    vec3.newFromValues( 0,  0,  1),  // +Y
+    vec3.newFromValues( 0,  0, -1),  // -Y
+    vec3.newFromValues( 0, -1,  0),  // +Z
+    vec3.newFromValues( 0, -1,  0),  // -Z
+  ];
+
+  export const RIGHT = [
+    vec3.newFromValues( 0,  0, -1),  // +X
+    vec3.newFromValues( 0,  0,  1),  // -X
+    vec3.newFromValues( 1,  0,  0),  // +Y
+    vec3.newFromValues( 1,  0,  0),  // -Y
+    vec3.newFromValues( 1,  0,  0),  // +Z
+    vec3.newFromValues(-1,  0,  0),  // -Z
+  ];
+
   export interface Format {
     filter?: TextureMinFilter;
     format: TextureInternalFormat;
@@ -155,7 +153,7 @@ export namespace DynamicCubeMap {
     // Empty otherwise.
     pixels: TypedArray[] = [];
 
-    constructor(public name: string, public fb: Framebuffer, public view: mat4.Type, proj: mat4.Type) {
+    constructor(public fb: Framebuffer, public view: mat4.Type, proj: mat4.Type) {
       mat4.mul(this.viewProj, proj, this.view);
     }
   }

@@ -1,7 +1,7 @@
-import * as u64 from '../types/uint64'
+import {uint64} from '../types/uint64'
 
-const _mul = u64.newFromParts(0x5851f42d, 0x4c957f2d);
-const _tmp = u64.newZero();
+const _mul = uint64.newFromParts(0x5851f42d, 0x4c957f2d);
+const _tmp = uint64.newZero();
 
 
 // Rotate a 32bit value right by rot bits.
@@ -14,39 +14,39 @@ function rotr32(value: number, rot: number) {
 // An implementation of the basic 32bit PCG random number generator.
 // http://www.pcg-random.org/
 export class PcgRandom32 {
-  private state: u64.Type;
-  private inc: u64.Type;
+  private state: uint64.Type;
+  private inc: uint64.Type;
 
-  constructor(state: number | u64.Type, seq: number | u64.Type) {
-    this.state = u64.newZero();
-    this.inc = u64.newZero();
+  constructor(state: number | uint64.Type, seq: number | uint64.Type) {
+    this.state = uint64.newZero();
+    this.inc = uint64.newZero();
 
     if (typeof(state) == 'number') {
-      u64.setFromNumber(_tmp, state);
+      uint64.setFromNumber(_tmp, state);
     } else {
-      u64.setFromUint64(_tmp, state);
+      uint64.setFromUint64(_tmp, state);
     }
 
     if (typeof(seq) == 'number') {
-      u64.setFromNumber(this.inc, seq);
+      uint64.setFromNumber(this.inc, seq);
     } else {
-      u64.setFromUint64(this.inc, seq);
+      uint64.setFromUint64(this.inc, seq);
     }
 
-    u64.shl(this.inc, this.inc, 1);
+    uint64.shl(this.inc, this.inc, 1);
     this.inc[0] |= 1;
 
     this._step();
-    u64.add(this.state, this.state, _tmp);
+    uint64.add(this.state, this.state, _tmp);
     this._step();
   }
 
   // Returns a random unsigned 32bit integer in the range [0, 0xffffffff].
   next32() {
     // Shuffle the state to generate the final output.
-    u64.shr(_tmp, this.state, 18);
-    u64.xor(_tmp, _tmp, this.state);
-    u64.shr(_tmp, _tmp, 27);
+    uint64.shr(_tmp, this.state, 18);
+    uint64.xor(_tmp, _tmp, this.state);
+    uint64.shr(_tmp, _tmp, 27);
     const result = rotr32(_tmp[0], this.state[1] >>> 27);
     this._step();
     return result;
@@ -64,8 +64,8 @@ export class PcgRandom32 {
 
   // Advance the internal state.
   _step() {
-    u64.mul(this.state, this.state, _mul);
-    u64.add(this.state, this.state, this.inc);
+    uint64.mul(this.state, this.state, _mul);
+    uint64.add(this.state, this.state, this.inc);
   }
 
   fn() {

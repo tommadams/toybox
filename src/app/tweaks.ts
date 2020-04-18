@@ -1,14 +1,14 @@
-export type ObjectListener = (field: string, newValue: any, oldValue: any) => void;
-export type Listener = (newValue: any, oldValue: any) => boolean | void;
+type ObjectListener = (field: string, newValue: any, oldValue: any) => void;
+type Listener = (newValue: any, oldValue: any) => boolean | void;
 
-export interface BaseTweakDef {
+interface BaseTweakDef {
   prop: string,
   onChange?: (oldVal: any, newVal: any) => boolean | void;
 }
 
 interface Obj { [index: string]: any }
 
-export abstract class Tweak {
+abstract class Tweak {
   private onChange: Listener;
   protected content: HTMLElement;
   protected prop: string;
@@ -74,9 +74,9 @@ export abstract class Tweak {
   }
 }
 
-export interface BooleanTweakDef extends BaseTweakDef {}
+interface BooleanTweakDef extends BaseTweakDef {}
 
-export class BooleanTweak extends Tweak {
+class BooleanTweak extends Tweak {
   private checkElem: HTMLInputElement;
 
   constructor(objectListeners: ObjectListener[],
@@ -100,11 +100,11 @@ export class BooleanTweak extends Tweak {
   }
 }
 
-export interface SelectTweakDef extends BaseTweakDef {
+interface SelectTweakDef extends BaseTweakDef {
   options: string[];
 }
 
-export class SelectTweak extends Tweak {
+class SelectTweak extends Tweak {
   private options: string[];
   private selectElem: HTMLSelectElement;
 
@@ -143,14 +143,14 @@ export class SelectTweak extends Tweak {
   }
 }
 
-export interface RangeTweakDef extends BaseTweakDef {
+interface RangeTweakDef extends BaseTweakDef {
   min: number;
   max: number;
   squash?: number;
   integer: boolean;
 }
 
-export class RangeTweak extends Tweak {
+class RangeTweak extends Tweak {
   private rangeElem: HTMLDivElement;
   private textElem: HTMLInputElement;
   private onMouseDown: (e: MouseEvent) => void;
@@ -253,9 +253,9 @@ export class RangeTweak extends Tweak {
   }
 }
 
-export interface StringTweakDef extends BaseTweakDef {}
+interface StringTweakDef extends BaseTweakDef {}
 
-export class StringTweak extends Tweak {
+class StringTweak extends Tweak {
   private textElem: HTMLInputElement;
 
   constructor(objectListeners: ObjectListener[],

@@ -2,7 +2,7 @@ import {NumericArray} from '../types/array';
 import {assertTrue, assertEqual, assertNotNull, assertRoughlyEqual, assertElementsRoughlyEqual, runTests} from '../util/test_util';
 
 import * as intersect3d from './intersect3d';
-import * as vec3 from './vec3';
+import {vec3} from './vec3';
 
 
 let E = 0.000001;

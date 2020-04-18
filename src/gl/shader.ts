@@ -166,7 +166,7 @@ class BlockUniform {
 // TODO(tom): expose an interface that allows clients to create multiple
 // instances of a block and bind different ones to a shader efficiently (rather
 // than poking at values in the shader's uniform block).
-export class Block {
+export class UniformBlock {
   handle: WebGLBuffer;
   buffer: ArrayBuffer;
   uniforms: {[id: string]: BlockUniform};
@@ -363,7 +363,7 @@ export class ShaderProgram {
   handle: WebGLProgram;
   vs: Shader = null;
   fs: Shader = null;
-  blocks: {[id: string]: Block} = {};
+  blocks: {[id: string]: UniformBlock} = {};
   uniforms: {[id: string]: Uniform} = {};
   samplers: {[id: string]: Sampler} = {};
 
@@ -422,12 +422,12 @@ export class ShaderProgram {
       if (block === undefined) {
         // Not a shared uniform block.
         const binding = uniqueBlockIdx++;
-        block = new Block(gl, this.handle, name, idx, binding);
+        block = new UniformBlock(gl, this.handle, name, idx, binding);
       } else if (typeof(block) == 'number') {
         // First time seeing a shared uniform block with this name.
         // `block` is the block's binding.
         const binding = block;
-        block = new Block(gl, this.handle, name, idx, binding);
+        block = new UniformBlock(gl, this.handle, name, idx, binding);
         ctx.sharedUniformBlocks[name] = block;
       } else {
         // We've already created this shared uniform block.

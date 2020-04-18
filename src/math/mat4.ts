@@ -1,15 +1,17 @@
 import {NumericArray} from '../types/array'
 
-import * as qt from './quat'
-import * as v3 from './vec3'
-import * as v4 from './vec4'
+import {quat} from './quat'
+import {vec3} from './vec3'
+import {vec4} from './vec4'
+
+export namespace mat4 {
 
 export type Type = Float32Array;
 export type ArgType = NumericArray;
 
-const _x = v3.newZero();
-const _y = v3.newZero();
-const _z = v3.newZero();
+const _x = vec3.newZero();
+const _y = vec3.newZero();
+const _z = vec3.newZero();
 
 export function newZero() {
   return new Float32Array(16);
@@ -19,7 +21,7 @@ export function newIdentity() {
   return setIdentity(new Float32Array(16));
 }
 
-export function newFromAxisAngle(axis: v3.Type, angle: number) {
+export function newFromAxisAngle(axis: vec3.Type, angle: number) {
   return setFromAxisAngle(new Float32Array(16), axis, angle);
 }
 
@@ -43,11 +45,11 @@ export function newFromValues(
 export function newFromMat(a: ArgType) {
   return setFromMat(new Float32Array(16), a);
 }
-export function newFromQuat(q: qt.ArgType) {
+export function newFromQuat(q: quat.ArgType) {
   return setFromQuat(new Float32Array(16), q);
 }
 
-export function newFromRows(a: v4.ArgType, b: v4.ArgType, c: v4.ArgType, d: v4.ArgType) {
+export function newFromRows(a: vec4.ArgType, b: vec4.ArgType, c: vec4.ArgType, d: vec4.ArgType) {
   return setFromRows(new Float32Array(16), a, b, c, d);
 }
 
@@ -67,7 +69,7 @@ export function newPerspective(fovy: number, aspect: number, near: number, far: 
   return setPerspective(new Float32Array(16), fovy, aspect, near, far);
 }
 
-export function newLookAt(eye: v3.ArgType, target: v3.ArgType, up: v3.ArgType) {
+export function newLookAt(eye: vec3.ArgType, target: vec3.ArgType, up: vec3.ArgType) {
   return setLookAt(new Float32Array(16), eye, target, up);
 }
 
@@ -83,7 +85,7 @@ export function newRotateZ(a: number) {
   return setRotateZ(new Float32Array(16), a);
 }
 
-export function newAffine(x: v3.ArgType, y: v3.ArgType, z: v3.ArgType, t: v3.ArgType) {
+export function newAffine(x: vec3.ArgType, y: vec3.ArgType, z: vec3.ArgType, t: vec3.ArgType) {
   return setAffine(new Float32Array(16), x, y, z, t);
 }
 
@@ -110,7 +112,7 @@ export function setFromArray(dst: Type, a: ArgType) {
 }
 
 
-export function setFromAxisAngle(dst: Type, axis: v3.ArgType, angle: number) {
+export function setFromAxisAngle(dst: Type, axis: vec3.ArgType, angle: number) {
   const c = Math.cos(angle);
   const d = 1 - c;
   const s = Math.sin(angle);
@@ -138,7 +140,7 @@ export function setFromAxisAngle(dst: Type, axis: v3.ArgType, angle: number) {
 }
 
 
-export function setFromQuat(dst: Type, q: qt.ArgType) {
+export function setFromQuat(dst: Type, q: quat.ArgType) {
   const a = q[0], b = q[1], c = q[2], d = q[3];
   const a2 = 2 * a, b2 = 2 * b, c2 = 2 * c;
   const da = a2 * d;
@@ -194,7 +196,7 @@ export function setFromMat(dst: Type, a: ArgType) {
 }
 
 
-export function setFromRows(dst: Type, a: v4.ArgType, b: v4.ArgType, c: v4.ArgType, d: v4.ArgType) {
+export function setFromRows(dst: Type, a: vec4.ArgType, b: vec4.ArgType, c: vec4.ArgType, d: vec4.ArgType) {
   dst[0] = a[0]; dst[1] = a[1]; dst[2] = a[2]; dst[3] = a[3];
   dst[4] = b[0]; dst[5] = b[1]; dst[6] = b[2]; dst[7] = b[3];
   dst[8] = c[0]; dst[9] = c[1]; dst[10] = c[2]; dst[11] = c[3];
@@ -263,17 +265,17 @@ export function getPerspectiveFar(a: ArgType) {
 }
 
 
-export function setLookAt(dst: Type, eye: v3.ArgType, target: v3.ArgType, up: v3.ArgType) {
-  v3.normalize(_z, v3.sub(_z, eye, target));
-  v3.normalize(_x, v3.cross(_x, up, _z));
-  v3.normalize(_y, v3.cross(_y, _z, _x));
+export function setLookAt(dst: Type, eye: vec3.ArgType, target: vec3.ArgType, up: vec3.ArgType) {
+  vec3.normalize(_z, vec3.sub(_z, eye, target));
+  vec3.normalize(_x, vec3.cross(_x, up, _z));
+  vec3.normalize(_y, vec3.cross(_y, _z, _x));
   dst[0] = _x[0]; dst[4] = _x[1]; dst[8] = _x[2];
   dst[1] = _y[0]; dst[5] = _y[1]; dst[9] = _y[2];
   dst[2] = _z[0]; dst[6] = _z[1]; dst[10] = _z[2];
   dst[3] = 0; dst[7] = 0; dst[11] = 0;
-  dst[12] = -v3.dot(_x, eye);
-  dst[13] = -v3.dot(_y, eye);
-  dst[14] = -v3.dot(_z, eye);
+  dst[12] = -vec3.dot(_x, eye);
+  dst[13] = -vec3.dot(_y, eye);
+  dst[14] = -vec3.dot(_z, eye);
   dst[15] = 1;
   return dst;
 }
@@ -312,7 +314,7 @@ export function setRotateZ(dst: Type, a: number) {
 }
 
 
-export function setAffine(dst: Type, x: v3.ArgType, y: v3.ArgType, z: v3.ArgType, t: v3.ArgType) {
+export function setAffine(dst: Type, x: vec3.ArgType, y: vec3.ArgType, z: vec3.ArgType, t: vec3.ArgType) {
   dst[0]  = x[0]; dst[1]  = x[1]; dst[2]  = x[2]; dst[3]  = 0;
   dst[4]  = y[0]; dst[5]  = y[1]; dst[6]  = y[2]; dst[7]  = 0;
   dst[8]  = z[0]; dst[9]  = z[1]; dst[10] = z[2]; dst[11] = 0;
@@ -321,45 +323,45 @@ export function setAffine(dst: Type, x: v3.ArgType, y: v3.ArgType, z: v3.ArgType
 }
 
 
-export function getRow(dst: v4.Type, row: number, m: ArgType) {
+export function getRow(dst: vec4.Type, row: number, m: ArgType) {
   row *= 4;
   dst[0] = m[row++]; dst[1] = m[row++]; dst[2] = m[row++]; dst[3] = m[row++];
   return dst;
 }
 
 
-export function getX(dst: v3.Type, m: ArgType) {
+export function getX(dst: vec3.Type, m: ArgType) {
   dst[0] = m[0]; dst[1] = m[1]; dst[2] = m[2];
   return dst;
 }
 
 
-export function getY(dst: v3.Type, m: ArgType) {
+export function getY(dst: vec3.Type, m: ArgType) {
   dst[0] = m[4]; dst[1] = m[5]; dst[2] = m[6];
   return dst;
 }
 
 
-export function getZ(dst: v3.Type, m: ArgType) {
+export function getZ(dst: vec3.Type, m: ArgType) {
   dst[0] = m[8]; dst[1] = m[9]; dst[2] = m[10];
   return dst;
 }
 
 
-export function getTranslation(dst: v3.Type, m: ArgType) {
+export function getTranslation(dst: vec3.Type, m: ArgType) {
   dst[0] = m[12]; dst[1] = m[13]; dst[2] = m[14];
   return dst;
 }
 
 
-export function getCol(dst: v3.Type, col: number, m: ArgType) {
+export function getCol(dst: vec3.Type, col: number, m: ArgType) {
   dst[0] = m[col]; dst[1] = m[col+4]; dst[2] = m[col+8]; dst[3] = m[col+12];
   return dst;
 }
 
 // From "Extracting Euler Angles from a Rotation Matrix" by Mike Day.
 // https://d3cw3dd2w32x2b.cloudfront.net/wp-content/uploads/2012/07/euler-angles1.pdf
-export function getRotation(dst: v3.Type, m: ArgType) {
+export function getRotation(dst: vec3.Type, m: ArgType) {
   let t1 = Math.atan2(m[6], m[10]);
   let c2 = Math.sqrt(m[0] * m[0] + m[1] * m[1]);
   let t2 = Math.atan2(-m[2], c2);
@@ -372,7 +374,7 @@ export function getRotation(dst: v3.Type, m: ArgType) {
   return dst;
 }
 
-export function setRow(dst: Type, row: number, v: v4.ArgType) {
+export function setRow(dst: Type, row: number, v: vec4.ArgType) {
   row *= 4;
   dst[row++] = v[0]; dst[row++] = v[1]; dst[row++] = v[2]; dst[row++] = v[3];
   return dst;
@@ -387,7 +389,7 @@ export function setRowValues(dst: Type, row: number,
 }
 
 
-export function setCol(dst: Type, col: number, v: v4.ArgType) {
+export function setCol(dst: Type, col: number, v: vec4.ArgType) {
   dst[col] = v[0]; dst[col+4] = v[1]; dst[col+8] = v[2]; dst[col+12] = v[3];
   return dst;
 }
@@ -572,7 +574,7 @@ export function mul(dst: Type, a: ArgType, b: ArgType) {
 
 // Transforms the given position `p` by matrix `m`.
 // Applies translation.
-export function mulPos(dst: v3.Type, m: ArgType, p: v3.ArgType) {
+export function mulPos(dst: vec3.Type, m: ArgType, p: vec3.ArgType) {
   const x = p[0], y = p[1], z = p[2];
   dst[0] = x * m[0] + y * m[4] + z * m[8] + m[12];
   dst[1] = x * m[1] + y * m[5] + z * m[9] + m[13];
@@ -583,7 +585,7 @@ export function mulPos(dst: v3.Type, m: ArgType, p: v3.ArgType) {
 
 // Transforms the given vector `v` by projective matrix `m`.
 // Applies homonegeous divide.
-export function mulPosProjective(dst: v3.Type, m: ArgType, p: v3.ArgType) {
+export function mulPosProjective(dst: vec3.Type, m: ArgType, p: vec3.ArgType) {
   const x = p[0], y = p[1], z = p[2];
   const iw = 1 / (x * m[3] + y * m[7] + z * m[11] + m[15]);
   dst[0] = (x * m[0] + y * m[4] + z * m[8]) * iw;
@@ -595,7 +597,7 @@ export function mulPosProjective(dst: v3.Type, m: ArgType, p: v3.ArgType) {
 
 // Transforms the given vector `v` by matrix `m`.
 // Does not apply translation.
-export function mulVec(dst: v3.Type, m: ArgType, v: v3.ArgType) {
+export function mulVec(dst: vec3.Type, m: ArgType, v: vec3.ArgType) {
   const x = v[0], y = v[1], z = v[2];
   dst[0] = x * m[0] + y * m[4] + z * m[8];
   dst[1] = x * m[1] + y * m[5] + z * m[9];
@@ -650,4 +652,6 @@ export function toString(m: Type, precision=3, sep=' ') {
 `
   }
   return str;
+}
+
 }

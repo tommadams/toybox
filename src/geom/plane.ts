@@ -1,6 +1,8 @@
-import * as vec3 from '../math/vec3';
+import {vec3} from '../math/vec3';
 
 import {Mesh, flatten} from './mesh';
+
+export namespace plane {
 
 export function newMesh(center: vec3.ArgType, normal: vec3.ArgType, size: number,
                         subdivisions: number) {
@@ -48,4 +50,6 @@ export function newFlatMesh(center: vec3.ArgType, normal: vec3.ArgType, size: nu
   // TODO(tom): write an optimized version of this that constructs the FlatMesh
   // directly.
   return flatten(newMesh(center, normal, size, subdivisions));
+}
+
 }

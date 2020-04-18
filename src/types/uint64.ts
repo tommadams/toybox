@@ -1,3 +1,6 @@
+export namespace uint64 {
+
+
 export type Type = number[] | Uint32Array
 
 
@@ -167,4 +170,7 @@ export function toString(a: Type) {
   lo = '00000000'.substr(0, 8 - lo.length) + lo;
   hi = '00000000'.substr(0, 8 - hi.length) + hi;
   return `0x${hi}${lo}`;
+}
+
+
 }

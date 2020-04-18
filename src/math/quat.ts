@@ -1,7 +1,11 @@
 import {NumericArray} from '../types/array'
 
-import * as m4 from './mat4'
-import * as v3 from './vec3'
+import {mat4} from './mat4'
+import {vec3} from './vec3'
+
+
+export namespace quat {
+
 
 export type Type = Float32Array;
 export type ArgType = NumericArray;
@@ -55,12 +59,12 @@ export function newFromArray(a: ArgType) {
 }
 
 
-export function newFromMat4(m: m4.ArgType) {
+export function newFromMat4(m: mat4.ArgType) {
   return setFromMat4(new Float32Array(4), m);
 }
 
 
-export function newFromAxisAngle(axis: v3.ArgType, angle: number) {
+export function newFromAxisAngle(axis: vec3.ArgType, angle: number) {
   return setFromAxisAngle(new Float32Array(4), axis, angle);
 }
 
@@ -101,7 +105,7 @@ export function setFromArray(dst: Type, a: ArgType) {
 }
 
 
-export function setFromMat4(dst: Type, m: m4.ArgType) {
+export function setFromMat4(dst: Type, m: mat4.ArgType) {
   const sx = m[0], sy = m[5], sz = m[10];
   dst[3] = Math.sqrt(Math.max(0, 1 + sx + sy + sz)) / 2;
   dst[0] = Math.sqrt(Math.max(0, 1 + sx - sy - sz)) / 2;
@@ -114,7 +118,7 @@ export function setFromMat4(dst: Type, m: m4.ArgType) {
 }
 
 
-export function setFromAxisAngle(dst: Type, axis: v3.ArgType, angle: number) {
+export function setFromAxisAngle(dst: Type, axis: vec3.ArgType, angle: number) {
   const ha = 0.5 * angle;
   const s = Math.sin(ha);
   return setFromValues(dst, s * axis[0], s * axis[1], s * axis[2], Math.cos(ha));
@@ -188,4 +192,7 @@ export function slerp(dst: Type, q0: ArgType, q1: ArgType, t: number) {
   dst[2] = q0[2] * c0 + q1[2] * c1;
   dst[3] = q0[3] * c0 + q1[3] * c1;
   return dst;
+}
+
+
 }

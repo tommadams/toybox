@@ -5,56 +5,63 @@ import * as input from './input';
 
 declare let CodeMirror: any;
 
-CodeMirror.defineSimpleMode('glsl', {
-  // The start state contains the rules that are intially used
-  start: [
-    // You can match multiple tokens at once. Note that the captured
-    // groups must span the whole string in this case
-    {regex: /(?:varying|uniform|precision|attribute|mediump|highp)\b/, token: 'keyword'},
-    {regex: /(?:in|out)\b/, token: 'keyword'},
-    {regex: /(?:void|bool|int|uint|float)\b/, token: 'keyword'},
-    {regex: /(?:[biuv]?vec[234]|mat[234]x[234]|mat[234])\b/, token: 'keyword'},
-    {regex: /(?:sampler([123]D|Cube))\b/, token: 'keyword'},
-    {regex: /(?:#(if|elif|else|endif|error|include)\b)/, token: 'keyword-2'},
-    {regex: /(?:return|if|for|while|else|do)\b/, token: 'keyword'},
-    {regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i, token: 'number'},
-    {regex: /(?:true|false)/, token: 'number'},
-    {regex: /(?:radians|degrees|a?(sin|cos|tan))\b/, token: 'builtin'},
-    {regex: /(?:pow|exp2?|log2?|sqrt|inversesqrt)\b/, token: 'builtin'},
-    {regex: /(?:abs|sign|floor|ceil|fract|mod)\b/, token: 'builtin'},
-    {regex: /(?:min|max|clamp|mix|step|smoothstep)\b/, token: 'builtin'},
-    {regex: /(?:length|distance|dot|cross|normalize)\b/, token: 'builtin'},
-    {regex: /(?:faceforward|reflect|refract)\b/, token: 'builtin'},
-    {regex: /(?:matrixCompMult|(e|notE)qual)\b/, token: 'builtin'},
-    {regex: /(?:(less|greater)Than)\b/, token: 'builtin'},
-    {regex: /(?:(less|greater)ThanEqual)\b/, token: 'builtin'},
-    {regex: /(?:not|any|all)\b/, token: 'builtin'},
-    {regex: /texture(Lod|Grad)?\b/, token: 'builtin'},
-    {regex: /"(?:[^"\\]|\\.)*"/, token: 'string'},
+let codeMirrorInitialized = false;
 
-    {regex: /\/\/.*/, token: 'comment'},
-    // A next property will cause the mode to move to a different state
-    {regex: /\/\*/, token: 'comment', next: 'comment'},
-    {regex: /[-+\/*=<>!]+/, token: 'operator'},
-    // indent and dedent properties guide autoindentation
-    {regex: /[\{\[\(]/, indent: true},
-    {regex: /[\}\]\)]/, dedent: true},
-    {regex: /[A-Za-z_][\w]*/, token: 'variable'},
-  ],
-  // The multi-line comment state.
-  comment: [
-    {regex: /.*?\*\//, token: 'comment', next: 'start'},
-    {regex: /.*/, token: 'comment'}
-  ],
-  // The meta property contains global information about the mode. It
-  // can contain properties like lineComment, which are supported by
-  // all modes, and also directives like dontIndentStates, which are
-  // specific to simple modes.
-  meta: {
-    dontIndentStates: ['comment'],
-    lineComment: '//'
-  }
-});
+function initCodeMirror() {
+  if (codeMirrorInitialized) { return; }
+  codeMirrorInitialized = true;
+
+  CodeMirror.defineSimpleMode('glsl', {
+    // The start state contains the rules that are intially used
+    start: [
+      // You can match multiple tokens at once. Note that the captured
+      // groups must span the whole string in this case
+      {regex: /(?:varying|uniform|precision|attribute|mediump|highp)\b/, token: 'keyword'},
+      {regex: /(?:in|out)\b/, token: 'keyword'},
+      {regex: /(?:void|bool|int|uint|float)\b/, token: 'keyword'},
+      {regex: /(?:[biuv]?vec[234]|mat[234]x[234]|mat[234])\b/, token: 'keyword'},
+      {regex: /(?:sampler([123]D|Cube))\b/, token: 'keyword'},
+      {regex: /(?:#(if|elif|else|endif|error|include)\b)/, token: 'keyword-2'},
+      {regex: /(?:return|if|for|while|else|do)\b/, token: 'keyword'},
+      {regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i, token: 'number'},
+      {regex: /(?:true|false)/, token: 'number'},
+      {regex: /(?:radians|degrees|a?(sin|cos|tan))\b/, token: 'builtin'},
+      {regex: /(?:pow|exp2?|log2?|sqrt|inversesqrt)\b/, token: 'builtin'},
+      {regex: /(?:abs|sign|floor|ceil|fract|mod)\b/, token: 'builtin'},
+      {regex: /(?:min|max|clamp|mix|step|smoothstep)\b/, token: 'builtin'},
+      {regex: /(?:length|distance|dot|cross|normalize)\b/, token: 'builtin'},
+      {regex: /(?:faceforward|reflect|refract)\b/, token: 'builtin'},
+      {regex: /(?:matrixCompMult|(e|notE)qual)\b/, token: 'builtin'},
+      {regex: /(?:(less|greater)Than)\b/, token: 'builtin'},
+      {regex: /(?:(less|greater)ThanEqual)\b/, token: 'builtin'},
+      {regex: /(?:not|any|all)\b/, token: 'builtin'},
+      {regex: /texture(Lod|Grad)?\b/, token: 'builtin'},
+      {regex: /"(?:[^"\\]|\\.)*"/, token: 'string'},
+
+      {regex: /\/\/.*/, token: 'comment'},
+      // A next property will cause the mode to move to a different state
+      {regex: /\/\*/, token: 'comment', next: 'comment'},
+      {regex: /[-+\/*=<>!]+/, token: 'operator'},
+      // indent and dedent properties guide autoindentation
+      {regex: /[\{\[\(]/, indent: true},
+      {regex: /[\}\]\)]/, dedent: true},
+      {regex: /[A-Za-z_][\w]*/, token: 'variable'},
+    ],
+    // The multi-line comment state.
+    comment: [
+      {regex: /.*?\*\//, token: 'comment', next: 'start'},
+      {regex: /.*/, token: 'comment'}
+    ],
+    // The meta property contains global information about the mode. It
+    // can contain properties like lineComment, which are supported by
+    // all modes, and also directives like dontIndentStates, which are
+    // specific to simple modes.
+    meta: {
+      dontIndentStates: ['comment'],
+      lineComment: '//'
+    }
+  });
+}
 
 export class ShaderEditor {
   // URI of currently editing shader.
@@ -134,6 +141,8 @@ export class ShaderEditor {
         this.onCompileFn(this.shaderUri, this.editor.getValue());
       }
     }).bind(this);
+
+    initCodeMirror();
     this.editor = CodeMirror(editorElem, {
       lineNumbers: true,
       mode: 'glsl',

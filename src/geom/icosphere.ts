@@ -1,7 +1,9 @@
-import * as vec3 from '../math/vec3';
+import {vec3} from '../math/vec3';
 
-import * as icosahedron from './icosahedron';
+import {icosahedron} from './icosahedron';
 import {Mesh, FlatMesh, flatten, subdivide} from './mesh';
+
+export namespace icosphere {
 
 let cache: Mesh[] = [icosahedron.mesh];
 let flatCache: FlatMesh[] = [icosahedron.flatMesh];
@@ -39,4 +41,6 @@ export function newFlatMesh(numSubdivisions: number) {
     flatCache[numSubdivisions] = mesh;
   }
   return mesh.clone();
+}
+
 }

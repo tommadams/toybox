@@ -1,4 +1,4 @@
-import {Block, ShaderOptions, ShaderProgram, UniformBlockSetting} from './shader';
+import {UniformBlock, ShaderOptions, ShaderProgram, UniformBlockSetting} from './shader';
 import {Framebuffer} from './framebuffer';
 import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, ReadBuffer, SamplerParameter, TextureFormat, TextureTarget, TextureType} from './constants';
 import {ShaderRegistry, ShaderSource} from './shader_registry';
@@ -58,9 +58,9 @@ export class Context {
   // having to specify the layout of all shared uniform blocks when
   // constructing the context. The first time a shader is constructed that uses
   // a shared uniform block, it replaces the binding value with the actual
-  // shader Block instance (see the ShaderProgram code for details).
+  // shader UniformBlock instance (see the ShaderProgram code for details).
   // TODO(tom): change sharedUniformBlocks to a Map and remove numSharedUniformBlocks.
-  public sharedUniformBlocks: {[index: string]: number | Block} = {};
+  public sharedUniformBlocks: {[index: string]: number | UniformBlock} = {};
   public numSharedUniformBlocks = 0;
 
   private vertexAttribBindings: {[index: string]: number} = {};
@@ -286,7 +286,7 @@ export class Context {
   }
 
   setSharedUniformBlock(name: string, uniforms: UniformBlockSetting) {
-    (<Block>this.sharedUniformBlocks[name]).set(this.gl, uniforms);
+    (<UniformBlock>this.sharedUniformBlocks[name]).set(this.gl, uniforms);
   }
 
   useProgram(shader: ShaderProgram) {

@@ -1,6 +1,8 @@
 // RGB third order spherical harmonics.
 
-import * as vec3 from './vec3';
+import {vec3} from './vec3';
+
+export namespace sh3 {
 
 export type Type = Float32Array;
 
@@ -276,4 +278,6 @@ export function bilerp(dst: Type, a: Type, b: Type, c: Type, d: Type, u: number,
     dst[i] = iv * (iu * a[i] + u * b[i]) +
               v * (iu * c[i] + u * d[i]);
   }
+}
+
 }

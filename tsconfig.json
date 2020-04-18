@@ -15,18 +15,11 @@
         "noImplicitReturns": true,
 
         "declaration": true,
-        "baseUrl": "./",
+        "baseUrl": "./src",
         "outDir": "./built"
     },
     "include": [
-      "index.ts",
-      "app",
-      "color",
-      "geom",
-      "gl",
-      "math",
-      "types",
-      "util"
+      "src"
     ],
     "exclude": [
         "node_modules",

@@ -1,5 +1,7 @@
 import {NumericArray} from '../types/array'
 
+export namespace vec4 {
+
 export type Type = Float32Array;
 export type ArgType = NumericArray;
 
@@ -51,4 +53,6 @@ export function toString(v: ArgType, precision=3, sep=' ') {
   if (c[0] != '-') { c = ' ' + c; }
   if (d[0] != '-') { d = ' ' + d; }
   return `[${a}${sep}${b}${sep}${c}${sep}${d}]`;
+}
+
 }

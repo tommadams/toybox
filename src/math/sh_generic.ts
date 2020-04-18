@@ -14,6 +14,8 @@
 //             P_m_m = -1^m * (2m - 1)!! * (1 - x^2)^(m/2)
 //           P_m+1_m = x * (2m + 1) * P_m_m
 
+export namespace sh_generic {
+
 const factorial = (() => {
   let result = [1];
   for (let i = 1; i <= 32; ++i) {
@@ -73,4 +75,6 @@ export function SH(l: number, m: number, theta: number, phi: number) {
   } else {
     return sqrt2 * K(l, -m) * Math.sin(-m * phi) * P(l, -m, Math.cos(theta));
   }
+}
+
 }

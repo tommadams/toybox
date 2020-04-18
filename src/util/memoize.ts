@@ -1,4 +1,4 @@
-export function defaultMemoizeKeyFn(...args: any[]): string {
+function defaultMemoizeKeyFn(...args: any[]): string {
   if (args.length == 1 && typeof(args[0] != 'object')) {
     return args[0].toString();
   } else {
@@ -31,4 +31,3 @@ export function memoizeAsync(fn: Function, keyFn = defaultMemoizeKeyFn) {
     return memoized;
   };
 }
-

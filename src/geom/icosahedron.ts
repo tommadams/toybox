@@ -1,6 +1,8 @@
-import * as vec3 from '../math/vec3';
+import {vec3} from '../math/vec3';
 
 import {Mesh, flatten} from './mesh';
+
+export namespace icosahedron {
 
 const positions: vec3.Type[] = (() => {
   const theta = 0.4 * Math.PI;
@@ -77,3 +79,5 @@ const edgeIndices = [
 
 export let mesh = new Mesh(positions, faceIndices, edgeIndices);
 export let flatMesh = flatten(mesh);
+
+}

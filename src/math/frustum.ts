@@ -1,6 +1,8 @@
-import * as mat4 from './mat4';
-import * as vec3 from './vec3';
-import * as vec4 from './vec4';
+import {mat4} from './mat4';
+import {vec3} from './vec3';
+import {vec4} from './vec4';
+
+export namespace frustum {
 
 export type Type = Float32Array[];
 
@@ -78,4 +80,6 @@ export function newPerspective(fieldOfViewY: number, aspect: number) {
   let right = vec4.newFromValues(-c, 0, -s, 0);
 
   return [left, right, top, bottom];
+}
+
 }

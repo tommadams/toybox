@@ -1,4 +1,4 @@
-import * as vec3 from '../math/vec3';
+import {vec3} from '../math/vec3';
 
 export type IndexArray = Uint8Array | Uint16Array | Uint32Array;
 

@@ -1,9 +1,7 @@
-import typescript from 'rollup-plugin-typescript2';
-
 async function main() {
   let results = [
     {
-      input: 'index.ts',
+      input: 'src/index.ts',
       output: {
         file: 'built/toybox.js',
         format: 'umd',

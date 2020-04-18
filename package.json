@@ -7,13 +7,15 @@
     "url": "https://github.com/tommadams/toybox"
   },
   "devDependencies": {
+    "dts-generator": "^3.0.0",
     "rollup": "^1.32.1",
     "rollup-plugin-typescript2": "^0.27.0",
+    "tsc-watch": "^4.2.3",
     "tslib": "^1.11.1",
     "typescript": "^3.8.3"
   },
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w"
+    "dev": "tsc-watch --onSuccess 'rollup -c rollup-built.config.js'"
   }
 }

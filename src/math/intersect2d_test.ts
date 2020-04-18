@@ -2,7 +2,7 @@ import {assertTrue, assertEqual, assertRoughlyEqual, assertElementsRoughlyEqual,
 import {NumericArray} from '../types/array';
 
 import * as intersect2d from './intersect2d';
-import * as vec2 from './vec2';
+import {vec2} from './vec2';
 
 
 

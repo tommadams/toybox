@@ -1,5 +1,5 @@
 import {EPSILON} from './constants';
-import * as vec2 from './vec2';
+import {vec2} from './vec2';
 
 /**
  * Details about an intersection.
