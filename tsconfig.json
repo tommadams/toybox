@@ -20,14 +20,5 @@
     },
     "include": [
       "src"
-    ],
-    "exclude": [
-        "node_modules",
-        "**/dist/**",
-        "**/lib/**",
-        "**/test/**",
-        "**/scripts/**",
-        "bundles/**/*.d.ts",
-        "rollup.config.js"
     ]
 }

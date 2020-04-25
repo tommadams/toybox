@@ -1,18 +1,16 @@
 async function main() {
   let results = [
     {
-      input: 'src/index.ts',
+      input: 'built/toybox.js',
       output: {
-        file: 'built/toybox.js',
+        file: 'dist/toybox.js',
         format: 'umd',
         freeze: true,
         sourcemap: true,
         name: 'toybox',
       },
       treeshake: false,
-      plugins: [
-        typescript(),
-      ],
+      context: 'this',
     }
   ];
 

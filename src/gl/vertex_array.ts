@@ -97,6 +97,7 @@ function isMultiStreamVertexBufferDef(buffer: VertexBufferDef): buffer is MultiS
   return (<MultiStreamVertexBufferDef>buffer).streams !== undefined;
 }
 
+// TODO(tom): rename to BufferBase.
 export class Buffer {
   handle: WebGLBuffer;
   usage: BufferUsage;

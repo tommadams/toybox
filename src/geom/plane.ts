@@ -1,11 +1,11 @@
 import {vec3} from '../math/vec3';
 
-import {Mesh, flatten} from './mesh';
+import {FlatMesh, Mesh, flatten} from './mesh';
 
 export namespace plane {
 
 export function newMesh(center: vec3.ArgType, normal: vec3.ArgType, size: number,
-                        subdivisions: number) {
+                        subdivisions: number): Mesh {
   if (subdivisions < 1) {
     throw new Error(`subdivisions must be >= 1, got ${subdivisions}`);
   }
@@ -46,7 +46,7 @@ export function newMesh(center: vec3.ArgType, normal: vec3.ArgType, size: number
 }
 
 export function newFlatMesh(center: vec3.ArgType, normal: vec3.ArgType, size: number,
-                            subdivisions: number) {
+                            subdivisions: number): FlatMesh {
   // TODO(tom): write an optimized version of this that constructs the FlatMesh
   // directly.
   return flatten(newMesh(center, normal, size, subdivisions));

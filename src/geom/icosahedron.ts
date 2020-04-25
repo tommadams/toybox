@@ -1,6 +1,6 @@
 import {vec3} from '../math/vec3';
 
-import {Mesh, flatten} from './mesh';
+import {FlatMesh, Mesh, flatten} from './mesh';
 
 export namespace icosahedron {
 
@@ -78,6 +78,6 @@ const edgeIndices = [
 ];
 
 export let mesh = new Mesh(positions, faceIndices, edgeIndices);
-export let flatMesh = flatten(mesh);
+export let flatMesh: FlatMesh = flatten(mesh);
 
 }
