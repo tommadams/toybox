@@ -34,6 +34,7 @@ export * from './math/sh3';
 export * from './math/sh_generic';
 export * from './math/vec2';
 export * from './math/vec3';
+export * from './math/vec4';
 
 export * from './types/array';
 export * from './types/uint64';

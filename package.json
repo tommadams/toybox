@@ -8,13 +8,15 @@
   },
   "devDependencies": {
     "rollup": "^1.32.1",
+    "terser": "^4.6.12",
     "tsc-watch": "^4.2.3",
     "tslib": "^1.11.1",
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "post-build": "rollup -c rollup.config.js  &&  node bundle_dts.js",
-    "build": "tsc -b  &&  npm run post-build",
-    "dev": "tsc-watch --onSuccess 'npm run post-build'"
+    "minify": "terser dist/toybox.js -cm -o dist/toybox.min.js",
+    "bundle": "rollup -c rollup.config.js  &&  node bundle_dts.js",
+    "build": "tsc -b  &&  npm run bundle  &&  npm run minify",
+    "dev": "tsc-watch --onSuccess 'npm run bundle'"
   }
 }

@@ -34,7 +34,7 @@ function process(sourcePath) {
         process(realDepPath);
       }
     } else {
-      output.push(rawLine.replace('export declare ', 'export '));
+      output.push(rawLine.replace('declare ', ''));
     }
   }
 }

@@ -1,7 +1,6 @@
+import {input} from './input';
 import {Context} from '../gl/context';
 import {ShaderErrorMsg} from '../gl/shader';
-
-import * as input from './input';
 
 declare let CodeMirror: any;
 

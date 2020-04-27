@@ -1,3 +1,5 @@
+export namespace input {
+
 const keysDown = new Array<boolean>(256);
 const prevKeysDown = new Array<boolean>(256);
 const events: [string, any][] = [
@@ -154,4 +156,6 @@ function onMouseUp() {
 function onWheel(e: WheelEvent) {
   wheelDx = e.deltaX;
   wheelDy = e.deltaY;
+}
+
 }

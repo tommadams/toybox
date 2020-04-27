@@ -1,24 +1,24 @@
 {
-    "compilerOptions": {
-        "target": "es2016",
-        "sourceMap": true,
-        "allowJs": false,
-        "removeComments": false,
-        "newLine": "LF",
+  "compilerOptions": {
+    "target": "es2016",
+    "sourceMap": true,
+    "allowJs": false,
+    "removeComments": false,
+    "newLine": "LF",
 
-        "strict": true,
-        "strictBindCallApply": false,
-        "strictNullChecks": false,
-        "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noImplicitReturns": true,
+    "strict": true,
+    "strictBindCallApply": false,
+    "strictNullChecks": false,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
 
-        "declaration": true,
-        "baseUrl": "./src",
-        "outDir": "./built"
-    },
-    "include": [
-      "src"
-    ]
+    "declaration": true,
+    "baseUrl": "./src",
+    "outDir": "./built"
+  },
+  "include": [
+    "src"
+  ]
 }

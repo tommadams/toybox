@@ -1,4 +1,4 @@
-import * as input from './input'
+import {input} from './input'
 import {Context, ContextOptions} from '../gl/context'
 
 export abstract class App {
