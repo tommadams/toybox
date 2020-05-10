@@ -116,22 +116,7 @@ export class DynamicDraw {
   private blitVa: VertexArray;
 
   constructor(public ctx: Context) {
-    if (ctx.initialized) {
-      // TODO(tom): Because Context.newShaderProgram creates promises that get resolved
-      // during Context.init, DynamicDraw must be constructed before the Context is
-      // initialized. Relax this requirement by changing Context.newShaderProgram to
-      // try and create the program directly all shader sources have been previously
-      // loaded (and throw an exception if at least one source isn't loaded and the
-      // context is initialized).
-      throw new Error('DynamicDraw must be constructed before initializing the Context');
-    }
-
     const gl = ctx.gl;
-
-    this.ctx.shaderRegistry.register('draw.flat.vs', flatVsSrc);
-    this.ctx.shaderRegistry.register('draw.flat.fs', flatFsSrc);
-    this.ctx.shaderRegistry.register('draw.blit.vs', blitVsSrc);
-    this.ctx.shaderRegistry.register('draw.blit.fs', blitFsSrc);
 
     // Create a sampler object that disables texture compare and filtering for use
     // when blitting a depth texture.
@@ -141,13 +126,14 @@ export class DynamicDraw {
     gl.samplerParameteri(this.depthSampler, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
 
     this.shaders = {
-      flat: ctx.newShaderProgram('draw.flat.vs', 'draw.flat.fs')
+      flat: ctx.newShaderProgram({src: flatVsSrc}, {src: flatFsSrc}),
     };
 
     for (let mode in BlitMode) {
       if (typeof BlitMode[mode] === 'number') {
         this.shaders[mode] = ctx.newShaderProgram(
-            'draw.blit.vs', 'draw.blit.fs', {defines: {MODE: BlitMode[mode]}});
+            {src: blitVsSrc},
+            {src: blitFsSrc, defines: {MODE: BlitMode[mode]}});
       }
     }
 

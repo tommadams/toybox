@@ -1,6 +1,6 @@
 import {input} from './input';
-import {Context} from '../gl/context';
 import {ShaderErrorMsg} from '../gl/shader';
+import {shaderSource} from '../gl/shader_registry';
 
 declare let CodeMirror: any;
 
@@ -76,7 +76,7 @@ export class ShaderEditor {
   // Nested map from uri -> line number -> error message.
   private errors = new Map<string, Map<number, string>>();
 
-  constructor(parentElem: HTMLElement, private ctx: Context) {
+  constructor(parentElem: HTMLElement) {
     let containerElem = document.createElement('div');
     containerElem.style.display = 'flex';
     containerElem.style.flexFlow = 'column';
@@ -108,31 +108,28 @@ export class ShaderEditor {
     containerElem.appendChild(editorElem);
     parentElem.appendChild(containerElem);
 
-    ctx.onInit(() => {
-      const uris = ctx.shaderRegistry.getUris();
-      uris.sort();
-      uris.forEach((uri) => {
-        let elem = document.createElement('option');
-        elem.value = uri;
-        elem.innerText = uri;
-        selectElem.appendChild(elem);
-      });
-      let uri = selectElem.value;
-      if (uri != '') {
-        this.edit(uri, ctx.shaderRegistry.getSrc(uri));
-      }
-    });
+    for (let uri of shaderSource.getUris()) {
+      let elem = document.createElement('option');
+      elem.value = uri;
+      elem.innerText = uri;
+      selectElem.appendChild(elem);
+    }
+    let uri = selectElem.value;
+    if (uri != '') {
+      this.edit(uri, shaderSource.getSource(uri));
+    }
 
     selectElem.addEventListener('change', () => {
       let uri = selectElem.value;
-      this.edit(uri, ctx.shaderRegistry.getSrc(uri));
+      this.edit(uri, shaderSource.getSource(uri));
     });
 
     const dispatch = (() => {
+      console.log('TODO(tom): support recompliation again');
       this.clearErrors();
       try {
-        this.ctx.shaderRegistry.updateSource(
-            this.shaderUri, this.editor.getValue());
+        // this.ctx.shaderRegistry.updateSource(
+        //     this.shaderUri, this.editor.getValue());
       } catch (e) {
         this.setErrors(e.errors);
       }

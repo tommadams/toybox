@@ -1,203 +1,197 @@
-import {memoizeAsync} from '../util/memoize'
 import * as http from '../util/http'
 
-import {ShaderType} from './constants'
-import {Context} from './context'
-import {Shader, ShaderDefines, ShaderProgram, SrcMapEntry, TexUnits} from './shader'
+import {ShaderDefines, SourceMap} from './shader'
 
-// Default preamble for WebGL2 shaders.
-const defaultPreamble = `#version 300 es
-precision highp float;
-precision highp int;
-layout(std140, column_major) uniform;
-`;
+interface SourceSpan {
+  type: SourceSpan.Type;
+  lines: string[];
+}
 
-function parseDirectDeps(src: string): Set<string> {
-  let deps = new Set<string>();
-  src.split('\n').forEach((line) => {
-    const m = line.match(/^#include\s+"([^"]+)"\s*$/);
+namespace SourceSpan {
+export const enum Type {
+  SOURCE,
+  INCLUDE,
+}
+}
+
+function getSourceSpans(contents: string): SourceSpan[] {
+  let spans: SourceSpan[] = [];
+  for (let line of contents.split('\n')) {
+    let m = line.match(/^#include\s+"([^"]+)"\s*$/);
+    let type: SourceSpan.Type;
     if (m) {
-      deps.add(m[1]);
+      type = SourceSpan.Type.INCLUDE;
+      line = m[1];
+    } else {
+      type = SourceSpan.Type.SOURCE;
     }
-  });
-  return deps;
-}
-
-// TODO(tom): allow precision to be easily configured per shader.
-function getInstanceKey(uri: string, defines?: ShaderDefines, preamble?: string): string {
-  defines || {};
-  preamble || defaultPreamble;
-  let parts = [uri, preamble];
-  Object.keys(defines).sort().forEach((key) => {
-    const val = defines[key];
-    parts.push(`${key}\x01${val}`);
-  });
-  return parts.join('\x00');
-}
-
-export class ShaderSource {
-  instances = new Map<string, Shader>();
-  directDeps: Set<string>;
-  transitiveDeps: Set<string>;
-
-  constructor(public uri: string, public src: string) {
-    this.directDeps = parseDirectDeps(src);
-    this.transitiveDeps = new Set(this.directDeps);
+    if (spans.length == 0 || spans[spans.length - 1].type != type) {
+      spans.push({
+        type: type,
+        lines: [line],
+      });
+    } else {
+      spans[spans.length - 1].lines.push(line);
+    }
   }
+  return spans;
 }
 
-export class ShaderRegistry {
-  private sourceMap = new Map<string, ShaderSource>();
-  load: (uri: string) => Promise<ShaderSource>;
+export interface ShaderSource {
+  uri?: string;
+  src: string;
+  srcMap: SourceMap;
+}
 
-  constructor(private ctx: Context) {
-    this.ctx = ctx;
-    this.load = memoizeAsync(this.loadImpl);
-  }
+// A registry of parsed sources
+class SourceRegistry {
+  private sources = new Map<string, string>();
 
-  getUris(): string[] {
-    return Array.from(this.sourceMap.keys()).sort();
+  // Fetches one or more source fragments, recursively extracting and fetching
+  // other included fragments.
+  async fetch(uri: string | Iterable<string>): Promise<void> {
+    let pending: string[] = [];
+    if (typeof uri == 'string') {
+      if (!this.has(uri)) { pending.push(uri); }
+    } else {
+      for (let u of uri) {
+        if (!this.has(u) && pending.indexOf(u) == -1) { pending.push(u); }
+      }
+    }
+    if (pending.length == 0) {
+      return;
+    }
+
+    let visited = new Set<string>(pending);
+    while (pending.length > 0) {
+      let uris = pending;
+      for (let u of uris) {
+        console.log(`fetch ${u}`);
+      }
+      pending = [];
+
+      // Fetch all pending sources in parallel.
+      let promises = uris.map(u => http.memoizedGet(u));
+      let sources = await Promise.all(promises);
+      for (let i = 0; i < promises.length; ++i) {
+        this.add(uris[i], sources[i]);
+
+        for (let s of getSourceSpans(sources[i])) {
+          if (s.type == SourceSpan.Type.INCLUDE) {
+            for (let include of s.lines) {
+              if (visited.has(include) || this.has(include)) { continue; };
+              visited.add(include);
+              pending.push(include);
+            }
+          }
+        }
+      }
+    }
   }
 
   /**
-   * @param uri a shader URI.
-   * @returns true if the given shader and all its dependencies are in the registry.
+   * @returns a sorted list of all registered shader URIs.
    */
+  getUris(): string[] {
+    return Array.from(this.sources.keys()).sort();
+  }
+
+  // Adds source fragments with the given uri.
+  add(a: string | {[index: string]: string}, b?: string): void {
+    let impl = (uri: string, contents: string) => {
+      let existing = this.sources.get(uri);
+      if (existing !== undefined) {
+        if (existing != contents) {
+          throw new Error(`shader fragment ${uri} already registered with different source`);
+        }
+      } else {
+        this.sources.set(uri, contents);
+      }
+    };
+
+    if (typeof(a) == 'string') {
+      impl(a, b);
+    } else {
+      for (let uri in a) {
+        impl(uri, a[uri]);
+      }
+    }
+  }
+
   has(uri: string): boolean {
-    let source = this.sourceMap.get(uri);
-    if (source == null) { return false; }
-    for (let dep of source.transitiveDeps.values()) {
-      if (!this.sourceMap.has(dep)) {
-        return false;
-      }
-    }
-    return true;
+    return this.sources.has(uri);
   }
 
-  getSrc(uri: string): string {
-    return this.sourceMap.get(uri).src;
+  get(uri: string): string {
+    let source = this.sources.get(uri);
+    if (source === undefined) {
+      throw new Error(`shader source ${uri} not registered`);
+    }
+    return source;
   }
 
-  register(uri: string, src: string): void {
-    if (!this.sourceMap.has(uri)) {
-      this.sourceMap.set(uri, new ShaderSource(uri, src));
-    }
-  }
-
-  compile(type: ShaderType, uri: string, defines?: ShaderDefines): Shader {
-    const source = this.sourceMap.get(uri);
-    const preamble = defaultPreamble;
-    defines = defines || {};
-    const key = getInstanceKey(uri, defines, preamble);
-
-    // We've already compiled a shader for this URI/defines combination.
-    let instance = source.instances.get(key);
-    if (instance) {
-      return instance;
-    }
-
-    const preprocessed = this.preprocess(uri, defines, preamble);
-    const shader = new Shader(this.ctx, type, defines, preamble, preprocessed.src, preprocessed.map);
-    shader.uri = uri;
-    source.instances.set(key, shader);
-
-    return shader;
-  }
-
-  updateSource(uri: string, src: string): void {
-    let source = this.sourceMap.get(uri);
-    source.src = src;
-
-    const dirtyShaders = new Set<Shader>();
-    for (let source of this.sourceMap.values()) {
-      if (source.uri == uri || source.transitiveDeps.has(uri)) {
-        for (let inst of source.instances.values()) {
-          dirtyShaders.add(inst);
-        }
-      }
-    }
-
-    for (let shader of dirtyShaders) {
-      const preprocessed = this.preprocess(shader.uri, shader.defines, shader.preamble);
-      console.log(`recompiling ${shader.uri}`);
-      shader.compile(preprocessed.src, preprocessed.map);
-    }
-
-    const dirtyPrograms = new Set<ShaderProgram>();
-    for (let shader of dirtyShaders) {
-      shader.programs.forEach((program) => {
-        dirtyPrograms.add(program);
-      });
-    }
-    for (let program of dirtyPrograms) {
-      console.log(`relinking (${program.vs.uri}, ${program.fs.uri})`);
-      let texUnits: TexUnits = {};
-      for (let key in program.samplers) {
-        texUnits[key] = program.samplers[key].texUnit;
-      }
-      program.link(texUnits);
-    }
-  }
-
-  private preprocess(
-      uri: string, defines: ShaderDefines, preamble: string): {src: string, map: SrcMapEntry[]} {
-    let allLines = new Array<string>();
-    let map = new Array<SrcMapEntry>();
-
-    preamble.split('\n').forEach((line, i) => {
-      allLines.push(line);
-      map.push({uri: '__preamble__', line: i+1});
-    });
-
-    let i = 1;
+  preprocess(uri: string, src: string, defines: ShaderDefines, preamble: string): ShaderSource {
+    let preambleLines = preamble.split('\n');
+    let defineLines: string[] = [];
     for (let name in defines) {
-      allLines.push(`#define ${name} ${defines[name]}`);
-      map.push({uri: '__defines__', line: i++});
+      defineLines.push(`#define ${name} ${defines[name]}`);
     }
 
-    let processSource = (uri: string, source: ShaderSource) => {
-      source.src.split('\n').forEach((line, i) => {
-        let m = line.match(/^#include\s+"([^"]+)"\s*$/);
-        if (m) {
-          const include = m[1];
-          source.transitiveDeps.add(include);
-          processSource(include, this.sourceMap.get(include));
+    let lines = preambleLines.concat(defineLines);
+    let srcMap = new SourceMap();
+    srcMap.append('__preamble__', 1, preambleLines.length);
+    srcMap.append('__defines__', preambleLines.length, defineLines.length);
+
+    let includeStack: string[] = [uri];
+    let impl = (uri: string, src: string) => {
+      let lineNum = 1;
+      for (let span of getSourceSpans(src)) {
+        if (span.type == SourceSpan.Type.INCLUDE) {
+          for (let include of span.lines) {
+            if (includeStack.indexOf(include) != -1) {
+              throw new Error(
+                  `circular include of ${include} detected: [${includeStack.join(', ')}, ${include}]`);
+            }
+            includeStack.push(include);
+            impl(include, this.get(include));
+            includeStack.pop();
+          }
         } else {
-          allLines.push(line);
-          map.push({uri: uri, line: i+1});
+          lines = lines.concat(span.lines);
+          srcMap.append(uri, lineNum, span.lines.length);
         }
-      });
-    };
-    processSource(uri, this.sourceMap.get(uri));
 
-    return { src: allLines.join('\n'), map: map };
-  }
-
-  private async loadImpl(uri: string): Promise<ShaderSource> {
-    // Check if source for this URI has already been registered directly.
-    const source = this.sourceMap.get(uri);
-    if (source) {
-      return source;
-    }
-
-    let depStack = [uri];
-    let impl = async (uri: string) => {
-      let source = new ShaderSource(uri, await http.memoizedGet(uri));
-      this.sourceMap.set(uri, source);
-
-      for (let dep of source.directDeps.values()) {
-        if (depStack.indexOf(dep) != -1) {
-          throw new Error(
-              `circular include of ${dep} detected: [${depStack.join(', ')}, ${dep}]`);
-        }
-        depStack.push(dep);
-        await impl(dep);
-        depStack.pop();
+        lineNum += span.lines.length;
       }
-
-      return source;
     };
 
-    return await impl(uri);
+    impl(uri, src);
+    return { src: lines.join('\n'), srcMap };
   }
+}
+
+const sourceRegistry = new SourceRegistry();
+
+export namespace shaderSource {
+
+export async function fetchSource(uri: string | Iterable<string>): Promise<void> {
+  return sourceRegistry.fetch(uri);
+}
+
+export function getUris(): string[] {
+  return sourceRegistry.getUris();
+}
+
+export function addSource(a: string | {[index: string]: string}, b?: string): void {
+  return sourceRegistry.add(a, b);
+}
+
+export function getSource(uri: string) {
+  return sourceRegistry.get(uri);
+}
+
+export function preprocess(uri: string, src: string, defines: ShaderDefines, preamble: string): ShaderSource {
+  return sourceRegistry.preprocess(uri, src, defines, preamble);
+}
+
 }

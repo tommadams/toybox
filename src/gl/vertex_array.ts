@@ -25,6 +25,8 @@ export interface BufferDef {
   data?: NumericArray;
 }
 
+// TODO(tom): use function overloads instead of these complicated union types
+// (the implementation need not change).
 export interface SingleStreamVertexBufferDef extends BufferDef, StreamDef {}
 
 export interface MultiStreamVertexBufferDef extends BufferDef {

@@ -1,7 +1,7 @@
-import {UniformBlock, ShaderOptions, ShaderProgram, UniformBlockSetting} from './shader';
 import {Framebuffer} from './framebuffer';
-import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, ReadBuffer, SamplerParameter, TextureFormat, TextureTarget, TextureType} from './constants';
-import {ShaderRegistry, ShaderSource} from './shader_registry';
+import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, ReadBuffer, SamplerParameter, ShaderType, TextureFormat, TextureTarget, TextureType} from './constants';
+import {Shader, ShaderDef, ShaderProgram, TexUnits, UniformBlock, UniformBlockSetting} from './shader';
+import {shaderSource} from './shader_registry';
 import {Profiler} from './profiler';
 import {Texture, Texture2D, Texture2DDef, TextureCube, TextureCubeDef} from './texture';
 import {Buffer, VertexArray, VertexArrayDef, VertexBuffer, VertexBufferDef} from './vertex_array';
@@ -36,6 +36,10 @@ function isTexture(x: Texture | Texture2DDef): x is Texture {
   return (<Texture>x).handle !== undefined;
 }
 
+interface ShaderProgramsDefs {
+  [index: string]: {vs: ShaderDef, fs: ShaderDef, texUnits?: TexUnits};
+}
+
 export class Context {
   gl: WebGL2RenderingContext;
 
@@ -47,10 +51,6 @@ export class Context {
 
   // Currently bound framebuffer, or null if the back buffer is bound.
   boundFramebuffer: Framebuffer | null = null;
-
-  // TODO(tom): make shaderRegistry private, adding new public methods to
-  // the Context as required.
-  shaderRegistry: ShaderRegistry;
 
   // Map of uniform blocks shared between shaders.
   // Useful for things like camera matrices, lighting rigs, etc.
@@ -69,17 +69,9 @@ export class Context {
 
   private boundShader: ShaderProgram;
 
-  private promises: Promise<any>[];
-
   private pixelRatio = 1;
 
   private profiler: Profiler;
-
-  public init: () => void;
-
-  public initialized = false;
-
-  private anonymousShaderId = 0;
 
   constructor(public canvas: HTMLCanvasElement, options: ContextOptions) {
     options = options || {};
@@ -117,10 +109,6 @@ export class Context {
     // Vertex attrib bindings.
     this.maxVertexAttribs = this.gl.getParameter(GL.MAX_VERTEX_ATTRIBS);
 
-    this.promises = [new Promise((resolve) => {
-      this.init = resolve;
-    })];
-
     const supportedExtensions = this.gl.getSupportedExtensions().join('\n  ');
     console.log(`Supported extensions:\n  ${supportedExtensions}`);
 
@@ -138,8 +126,6 @@ export class Context {
       });
     }
 
-    this.shaderRegistry = new ShaderRegistry(this);
-
     this.resizeCanvas();
   }
 
@@ -148,18 +134,6 @@ export class Context {
   }
   get drawingBufferHeight(): number {
     return this.gl.drawingBufferHeight;
-  }
-
-  onInit(fn: () => void) {
-    let len = this.promises.length;
-    Promise.all(this.promises).then(() => { 
-      if (len == this.promises.length) {
-        this.initialized = true;
-        fn();
-      } else {
-        this.onInit(fn);
-      }
-    });
   }
 
   beginFrame() {
@@ -198,41 +172,65 @@ export class Context {
     }
   }
 
-  newShaderProgram(vsUri: string, fsUri: string, options?: ShaderOptions) {
-    const program = new ShaderProgram(this);
-    const loadPromises: Promise<ShaderSource>[] = [];
-    for (let uri of [vsUri, fsUri]) {
-      if (!this.shaderRegistry.has(uri)) {
-        loadPromises.push(this.shaderRegistry.load(uri));
-      }
+  newShader(def: ShaderDef, type: ShaderType) {
+    if (!def.uri && !def.src) {
+      throw new Error('shader def must have either uri or src property');
     }
 
-    let defines = options ? options.defines || null : null;
-    let texUnits = options ? options.texUnits || null : null;
+    // TODO(tom): bleh
+    const defaultPreamble = `#version 300 es
+precision highp float;
+precision highp int;
+layout(std140, column_major) uniform;
+`;
+    let preamble = def.preamble || defaultPreamble;
+    let defines = def.defines || {};
 
-    let compileAndLink = () => {
-      const vs = this.shaderRegistry.compile(GL.VERTEX_SHADER, vsUri, defines);
-      const fs = this.shaderRegistry.compile(GL.FRAGMENT_SHADER, fsUri, defines);
-      program.setShaders(vs, fs);
-      program.link(texUnits);
-    };
-    if (loadPromises.length > 0) {
-      this.promises.push(Promise.all(loadPromises).then(compileAndLink));
-    } else {
-      compileAndLink();
-    }
-    return program;
+    let uri = def.uri || `__anonymous__.${type == GL.VERTEX_SHADER ? 'vs' : 'fs'}`;
+    let src = def.src || shaderSource.getSource(def.uri);
+
+    let preprocessed = shaderSource.preprocess(uri, src, defines, preamble);
+
+    return new Shader(this, uri, type,
+                      def.defines || {},
+                      def.preamble || defaultPreamble,
+                      preprocessed.src, preprocessed.srcMap);
   }
 
-  // Convenience method for creating an shader from source.
-  // No memoization of the sources is performed.
-  newShaderProgramFromSource(vsSrc: string, fsSrc: string, options?: ShaderOptions) {
-    let vsUri = `__anonymous_vs_${this.anonymousShaderId}__`;
-    let fsUri = `__anonymous_fs_${this.anonymousShaderId}__`;
-    this.shaderRegistry.register(vsUri, vsSrc);
-    this.shaderRegistry.register(fsUri, fsSrc);
-    this.anonymousShaderId += 1;
-    return this.newShaderProgram(vsUri, fsUri, options);
+  newShaderProgram(vs: ShaderDef | Shader, fs: ShaderDef | Shader, texUnits?: TexUnits) {
+    let v = (vs instanceof Shader) ? vs : this.newShader(vs, GL.VERTEX_SHADER);
+    let f = (fs instanceof Shader) ? fs : this.newShader(fs, GL.FRAGMENT_SHADER);
+    return new ShaderProgram(this, v, f, texUnits);
+  }
+
+  newShaderPrograms<T extends ShaderProgramsDefs>(defs: T): {[key in keyof T]: ShaderProgram} {
+    let shaders: {[index: string]: [Shader, Shader]} = {};
+    for (let key in defs) {
+      let def = defs[key];
+      shaders[key] = [
+        this.newShader(def.vs, GL.VERTEX_SHADER),
+        this.newShader(def.fs, GL.FRAGMENT_SHADER),
+      ];
+    }
+
+    let programs: {[index: string]: ShaderProgram} = {};
+    for (let key in defs) {
+      let [vs, fs] = shaders[key];
+      let texUnits = defs[key].texUnits;
+      programs[key] = new ShaderProgram(this, vs, fs, texUnits);
+    }
+
+    return programs as {[key in keyof T]: ShaderProgram};
+  }
+
+  async newShaderProgramsAsync<T extends ShaderProgramsDefs>(defs: T): Promise<{[key in keyof T]: ShaderProgram}> {
+    let uris = new Set<string>();
+    for (let key in defs) {
+      if (defs[key].vs.uri) { uris.add(defs[key].vs.uri); }
+      if (defs[key].fs.uri) { uris.add(defs[key].fs.uri); }
+    }
+    await shaderSource.fetchSource(uris);
+    return this.newShaderPrograms(defs);
   }
 
   newVertexArray(buffers: VertexArrayDef) {

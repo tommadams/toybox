@@ -1,7 +1,7 @@
 import {NumericArray, TypedArray} from '../types/array'
 
 import {Context} from './context'
-import {GL, DataType} from './constants'
+import {GL, DataType, ShaderType} from './constants'
 import {Texture} from './texture'
 
 export interface ShaderErrorMsg {
@@ -10,17 +10,29 @@ export interface ShaderErrorMsg {
   msg: string;
 }
 
-export interface SrcMapEntry {
-  uri: string;
-  line: number;
-}
-
 export interface ShaderDefines {[id: string]: number | string}
 export interface TexUnits {[id: string]: number}
 
-export interface ShaderOptions {
+export enum ShaderPrecision {
+  LOW = 'lowp',
+  MEDIUM = 'mediump',
+  HIGH = 'highp',
+}
+
+export interface ShaderDef {
+  uri?: string;
+  src?: string;
   defines?: ShaderDefines;
   texUnits?: TexUnits;
+
+  // TODO(tom): replace preamble with explicit precision settings
+  preamble?: string;
+  // precision?: ShaderPrecision;
+  // intPrecision?: ShaderPrecision;
+  // floatPrecision?: ShaderPrecision;
+  // sampler2DPrecision?: ShaderPrecision;
+  // sampler3DPrecision?: ShaderPrecision;
+  // samplerCubePrecision?: ShaderPrecision;
 }
 
 export interface Sampler {
@@ -38,7 +50,7 @@ function uniformValueIsArray(value: number | NumericArray): value is NumericArra
 export class CompileError extends Error {
   errors = new Array<ShaderErrorMsg>();
 
-  constructor(msg: string, srcMap: SrcMapEntry[]) {
+  constructor(msg: string, sourceMap: SourceMap) {
     super(msg);
     console.log(`Raw GL error:\n${msg}`);
 
@@ -83,7 +95,7 @@ export class CompileError extends Error {
     groups.sort((a, b) => { return a.errorLine - b.errorLine; });
 
     groups.forEach((group) => {
-      let mappedLine = srcMap[group.errorLine - 1];
+      let mappedLine = sourceMap.translate(group.errorLine - 1);
       let error = {
         uri: mappedLine.uri,
         line: mappedLine.line,
@@ -337,32 +349,33 @@ export class UniformBlock {
 
 export class Shader {
   handle: WebGLShader;
-  defines: ShaderDefines;
   programs = new Array<ShaderProgram>();
-  uri = '';
 
-  constructor(public ctx: Context, public type: number, defines: ShaderDefines,
-              public preamble: string, src: string, srcMap: SrcMapEntry[]) {
+  preamble: string;
+  defines: ShaderDefines;
+
+  constructor(public ctx: Context, public uri: string, public type: ShaderType,
+              defines: ShaderDefines, preamble: string, src: string,
+              sourceMap: SourceMap) {
     const gl = ctx.gl;
+    this.preamble = preamble;
     this.handle = gl.createShader(type);
     this.defines = Object.assign({}, defines || {});
-    this.compile(src, srcMap);
+    this.compile(src, sourceMap);
   }
 
-  compile(src: string, srcMap: SrcMapEntry[]) {
+  compile(src: string, sourceMap: SourceMap) {
     const gl = this.ctx.gl;
     gl.shaderSource(this.handle, src);
     gl.compileShader(this.handle);
     if (!gl.getShaderParameter(this.handle, GL.COMPILE_STATUS)) {
-      throw new CompileError(gl.getShaderInfoLog(this.handle), srcMap);
+      throw new CompileError(gl.getShaderInfoLog(this.handle), sourceMap);
     }
   }
 }
 
 export class ShaderProgram {
   handle: WebGLProgram;
-  vs: Shader = null;
-  fs: Shader = null;
   blocks: {[id: string]: UniformBlock} = {};
   uniforms: {[id: string]: Uniform} = {};
   samplers: {[id: string]: Sampler} = {};
@@ -371,19 +384,15 @@ export class ShaderProgram {
   // the shader. Used for reporting debug messages.
   private unknownUniforms = new Set<string>();
 
-  constructor(public ctx: Context) {
+  constructor(public ctx: Context, public vs: Shader, public fs: Shader, texUnits?: TexUnits) {
+    const gl = ctx.gl;
     this.ctx = ctx;
     this.handle = ctx.gl.createProgram();
-  }
-
-  setShaders(vs: Shader, fs: Shader) {
-    const gl = this.ctx.gl;
-    this.vs = vs;
-    this.fs = fs;
     vs.programs.push(this);
     fs.programs.push(this);
     gl.attachShader(this.handle, vs.handle);
     gl.attachShader(this.handle, fs.handle);
+    this.link(texUnits);
   }
 
   link(texUnits?: TexUnits) {
@@ -533,3 +542,27 @@ export class ShaderProgram {
   }
 }
 
+export class SourceMap {
+  private entries: SourceMap.Mapping[] = [];
+
+  append(uri: string, begin: number, numLines: number): void {
+    for (let i = 0; i < numLines; ++i) {
+      this.entries.push({uri, line: begin + i});
+    }
+  }
+
+  translate(line: number): SourceMap.Mapping {
+    let result = this.entries[line];
+    if (result === undefined) {
+      throw new Error(`line ${line} out of range`);
+    }
+    return result;
+  }
+}
+
+export namespace SourceMap {
+export interface Mapping {
+  uri: string;
+  line: number;
+}
+}

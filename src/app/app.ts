@@ -35,10 +35,6 @@ export abstract class App {
       configurable: true
     });
 
-    this.ctx.onInit(() => {
-      this.onInit();
-    });
-
     window.addEventListener('resize', () => {
       if (!this.updating) {
         this.ctx.resizeCanvas();
@@ -46,9 +42,6 @@ export abstract class App {
       }
     });
   }
-
-  // Called once all async requests have completed and resources are ready.
-  protected abstract onInit(): void;
 
   protected abstract updateImpl(time: number): void;
 
@@ -72,6 +65,7 @@ export abstract class App {
 
   private requestUpdate() {
     if (!this.updateRequested) {
+      // TODO(tom): use requestPostAnimationFrame if it ever becomes standardised
       window.requestAnimationFrame((time: number) => {
         this.updateRequested = false;
         this.update(time);

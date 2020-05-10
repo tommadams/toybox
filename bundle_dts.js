@@ -1,3 +1,6 @@
+// Simple script that bundles the toybox .d.ts files together.
+// It's hacky but runs an order of magnitude faster than other libraries.
+
 'use strict';
 
 const fs = require("fs");

@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "rollup": "^1.32.1",
+    "rollup-plugin-sourcemaps": "^0.6.2",
     "terser": "^4.6.12",
     "tsc-watch": "^4.2.3",
     "tslib": "^1.11.1",
