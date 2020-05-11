@@ -78,36 +78,18 @@ export class ShaderEditor {
   private errors = new Map<string, Map<number, string>>();
 
   constructor(parentElem: HTMLElement, ctx: Context) {
-    let containerElem = document.createElement('div');
-    containerElem.style.display = 'flex';
-    containerElem.style.flexFlow = 'column';
-    containerElem.style.height = '100%';
-
-    let selectElem = document.createElement('select');
-    selectElem.style.margin = '2px';
-
-    let editorElem = document.createElement('div');
-    editorElem.style.flex = 'auto';
-    editorElem.style.height = '1px';
-
-    this.tooltipElem = document.createElement('div');
-    this.tooltipElem.style.fontFamily = 'monospace';
-    this.tooltipElem.style.position = 'absolute';
-    this.tooltipElem.style.display = 'none';
-    this.tooltipElem.style.zIndex = '10';
-    this.tooltipElem.style.maxWidth = '800px';
-    this.tooltipElem.style.borderRadius = '2px';
-    this.tooltipElem.style.backgroundColor = 'white';
-    this.tooltipElem.style.fontSize = '10px';
-    this.tooltipElem.style.padding = '1px 4px 1px 4px';
-    document.body.appendChild(this.tooltipElem);
+    parentElem.innerHTML = `
+        <div style="display:flex; flex-flow:column; height:100%">
+          <select style="margin:2px"></select>
+          <div style="flex:auto; height:1px"></div>
+        </div>
+        <div style="font-family:monospace; position:absolute; display:none; z-index:10; max-width:800px; border-radius:2px; background-color:white; font-size:10px; padding:1px 4px"></div>`;
+    let selectElem = parentElem.children[0].children[0] as HTMLSelectElement;
+    let editorElem = parentElem.children[0].children[1] as HTMLElement;
+    this.tooltipElem = parentElem.children[1] as HTMLElement;
 
     editorElem.addEventListener('mousemove', this.onMouseMove.bind(this));
     this.tooltipElem.addEventListener('mousemove', this.onMouseMove.bind(this));
-
-    containerElem.appendChild(selectElem);
-    containerElem.appendChild(editorElem);
-    parentElem.appendChild(containerElem);
 
     selectElem.addEventListener('change', () => {
       let uri = selectElem.value;
