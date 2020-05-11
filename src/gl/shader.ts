@@ -349,7 +349,6 @@ export class UniformBlock {
 
 export class Shader {
   handle: WebGLShader;
-  programs = new Array<ShaderProgram>();
 
   preamble: string;
   defines: ShaderDefines;
@@ -388,8 +387,6 @@ export class ShaderProgram {
     const gl = ctx.gl;
     this.ctx = ctx;
     this.handle = ctx.gl.createProgram();
-    vs.programs.push(this);
-    fs.programs.push(this);
     gl.attachShader(this.handle, vs.handle);
     gl.attachShader(this.handle, fs.handle);
     this.link(texUnits);

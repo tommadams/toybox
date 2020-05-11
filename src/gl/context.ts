@@ -1,7 +1,7 @@
 import {Framebuffer} from './framebuffer';
 import {GL, BlendEquation, BlendFunc, BufferTarget, Capability, CompareFunc, MipmapTarget, ReadBuffer, SamplerParameter, ShaderType, TextureFormat, TextureTarget, TextureType} from './constants';
 import {Shader, ShaderDef, ShaderProgram, TexUnits, UniformBlock, UniformBlockSetting} from './shader';
-import {shaderSource} from './shader_registry';
+import {shaderRegistry} from './shader_registry';
 import {Profiler} from './profiler';
 import {Texture, Texture2D, Texture2DDef, TextureCube, TextureCubeDef} from './texture';
 import {Buffer, VertexArray, VertexArrayDef, VertexBuffer, VertexBufferDef} from './vertex_array';
@@ -73,6 +73,8 @@ export class Context {
 
   private profiler: Profiler;
 
+  private allShaderPrograms = new Set<ShaderProgram>();
+
   constructor(public canvas: HTMLCanvasElement, options: ContextOptions) {
     options = options || {};
     this.gl = canvas.getContext('webgl2', options) as WebGL2RenderingContext;
@@ -82,7 +84,7 @@ export class Context {
     this.pixelRatio = Math.round(
         options.pixelRatio || window.devicePixelRatio || 1);
 
-    // TODO(tom): remove this once all constants have been added
+    // TODO(tom): remove this once all GL constants have been added
     // let str = '';
     // for (let key in GL) {
     //   if (key[0] >= '0' && key[0] <= '9') {
@@ -172,6 +174,7 @@ export class Context {
     }
   }
 
+  // TODO(tom): memoize this function
   newShader(def: ShaderDef, type: ShaderType) {
     if (!def.uri && !def.src) {
       throw new Error('shader def must have either uri or src property');
@@ -187,9 +190,9 @@ layout(std140, column_major) uniform;
     let defines = def.defines || {};
 
     let uri = def.uri || `__anonymous__.${type == GL.VERTEX_SHADER ? 'vs' : 'fs'}`;
-    let src = def.src || shaderSource.getSource(def.uri);
+    let src = def.src || shaderRegistry.getSource(def.uri);
 
-    let preprocessed = shaderSource.preprocess(uri, src, defines, preamble);
+    let preprocessed = shaderRegistry.preprocess(uri, src, defines, preamble);
 
     return new Shader(this, uri, type,
                       def.defines || {},
@@ -200,7 +203,9 @@ layout(std140, column_major) uniform;
   newShaderProgram(vs: ShaderDef | Shader, fs: ShaderDef | Shader, texUnits?: TexUnits) {
     let v = (vs instanceof Shader) ? vs : this.newShader(vs, GL.VERTEX_SHADER);
     let f = (fs instanceof Shader) ? fs : this.newShader(fs, GL.FRAGMENT_SHADER);
-    return new ShaderProgram(this, v, f, texUnits);
+    let program = new ShaderProgram(this, v, f, texUnits);
+    this.allShaderPrograms.add(program);
+    return program;
   }
 
   newShaderPrograms<T extends ShaderProgramsDefs>(defs: T): {[key in keyof T]: ShaderProgram} {
@@ -217,10 +222,45 @@ layout(std140, column_major) uniform;
     for (let key in defs) {
       let [vs, fs] = shaders[key];
       let texUnits = defs[key].texUnits;
-      programs[key] = new ShaderProgram(this, vs, fs, texUnits);
+      programs[key] = this.newShaderProgram(vs, fs, texUnits);
     }
 
     return programs as {[key in keyof T]: ShaderProgram};
+  }
+
+  recompileDirtyShaders(dirtyUri: string) {
+    // Find the set of dirty shaders & programs.
+    let dirtyShaders = new Set<Shader>();
+    let dirtyPrograms = new Set<ShaderProgram>();
+    for (let program of this.allShaderPrograms) {
+      for (let shader of [program.vs, program.fs]) {
+        if (!shaderRegistry.has(shader.uri)) { continue; }
+        if (shader.uri == dirtyUri ||
+            shaderRegistry.getTransitiveDeps(shader.uri).has(dirtyUri)) {
+          dirtyShaders.add(shader);
+          dirtyPrograms.add(program);
+        }
+      }
+    }
+
+    // Recompile dirty shaders.
+    for (let shader of dirtyShaders) {
+      console.log(`recompiling ${shader.uri}`);
+      let preprocessed = shaderRegistry.preprocess(
+          shader.uri, shaderRegistry.getSource(shader.uri),
+          shader.defines, shader.preamble);
+      shader.compile(preprocessed.src, preprocessed.srcMap);
+    }
+
+    // Relink dirty programs.
+    for (let program of dirtyPrograms) {
+      console.log(`relinking [${program.vs.uri}, ${program.fs.uri}]`);
+      let texUnits: TexUnits = {};
+      for (let key in program.samplers) {
+        texUnits[key] = program.samplers[key].texUnit;
+      }
+      program.link(texUnits);
+    }
   }
 
   async newShaderProgramsAsync<T extends ShaderProgramsDefs>(defs: T): Promise<{[key in keyof T]: ShaderProgram}> {
@@ -229,7 +269,7 @@ layout(std140, column_major) uniform;
       if (defs[key].vs.uri) { uris.add(defs[key].vs.uri); }
       if (defs[key].fs.uri) { uris.add(defs[key].fs.uri); }
     }
-    await shaderSource.fetchSource(uris);
+    await shaderRegistry.fetch(uris);
     return this.newShaderPrograms(defs);
   }
 

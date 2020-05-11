@@ -1,6 +1,7 @@
 import {input} from './input';
+import {Context} from '../gl/context';
 import {ShaderErrorMsg} from '../gl/shader';
-import {shaderSource} from '../gl/shader_registry';
+import {shaderRegistry} from '../gl/shader_registry';
 
 declare let CodeMirror: any;
 
@@ -76,7 +77,7 @@ export class ShaderEditor {
   // Nested map from uri -> line number -> error message.
   private errors = new Map<string, Map<number, string>>();
 
-  constructor(parentElem: HTMLElement) {
+  constructor(parentElem: HTMLElement, ctx: Context) {
     let containerElem = document.createElement('div');
     containerElem.style.display = 'flex';
     containerElem.style.flexFlow = 'column';
@@ -108,30 +109,19 @@ export class ShaderEditor {
     containerElem.appendChild(editorElem);
     parentElem.appendChild(containerElem);
 
-    for (let uri of shaderSource.getUris()) {
-      let elem = document.createElement('option');
-      elem.value = uri;
-      elem.innerText = uri;
-      selectElem.appendChild(elem);
-    }
-    let uri = selectElem.value;
-    if (uri != '') {
-      this.edit(uri, shaderSource.getSource(uri));
-    }
-
     selectElem.addEventListener('change', () => {
       let uri = selectElem.value;
-      this.edit(uri, shaderSource.getSource(uri));
+      this.edit(uri, shaderRegistry.getSource(uri));
     });
 
     const dispatch = (() => {
-      console.log('TODO(tom): support recompliation again');
       this.clearErrors();
       try {
-        // this.ctx.shaderRegistry.updateSource(
-        //     this.shaderUri, this.editor.getValue());
+        let shaderSource = this.editor.getValue();
+        shaderRegistry.replace(this.shaderUri, shaderSource);
+        ctx.recompileDirtyShaders(this.shaderUri);
       } catch (e) {
-        this.setErrors(e.errors);
+        if (e.errors) { this.setErrors(e.errors); }
       }
       if (this.onCompileFn) {
         this.onCompileFn(this.shaderUri, this.editor.getValue());
@@ -152,6 +142,17 @@ export class ShaderEditor {
     });
     this.editor.on('focus', input.disable);
     this.editor.on('blur', input.enable);
+
+    for (let uri of shaderRegistry.getUris()) {
+      let elem = document.createElement('option');
+      elem.value = uri;
+      elem.innerText = uri;
+      selectElem.appendChild(elem);
+    }
+    let uri = selectElem.value;
+    if (uri != '') {
+      this.edit(uri, shaderRegistry.getSource(uri));
+    }
   }
 
   onCompile(fn: (uri: string, src: string) => void) {
